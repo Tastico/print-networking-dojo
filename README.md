@@ -1,10 +1,10 @@
-# uniFLOW Networking Dojo
+# Print Networking Dojo
 
 Interactive, self-contained networking trainer built for print and IT field engineers. One HTML file, zero dependencies, works offline. Open it in any browser and it runs.
 
 ## Why this exists
 
-Field engineers get handed printers, MFPs, and uniFLOW servers and are expected to debug IP conflicts, firewalls, DNS, and raw socket printing on the spot. Most networking courses are written for datacenter people. This one is written for the person standing in front of a machine with a laptop and a cable tester.
+Field engineers get handed printers and MFPs and are expected to debug IP conflicts, firewalls, DNS, and raw socket printing on the spot. Most networking courses are written for datacenter people. This one is written for the person standing in front of a machine with a laptop and a cable tester.
 
 ## Modules (18)
 
