@@ -1,0 +1,2218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🖨️ uniFLOW Networking Dojo v4 — Interactive Learning</title>
+<style>
+/* ═══════════════════════════════════════
+   CYBERDECK THEME — v2 Expansion
+   A neon/holographic terminal vibe
+   ═══════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+
+:root{
+   --bg: #0d1117;
+   --bg2: #161b22;
+   --bg3: #1c2333;
+   --fg: #e6edf3;
+   --fg2: #8b949e;
+   --accent: #58a6ff;
+   --accent2: #f78166;
+  --accent3: #d29922;
+  --green: #3fb950;
+  --red: #f85149;
+  --orange: #d29922;
+  --blue: #58a6ff;
+  --purple: #bc8cff;
+  --radius: 8px;
+  --glow: 0 0 12px rgba(88,166,255,0.2);
+  --glow2: 0 0 12px rgba(247,129,102,0.2);
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:monospace;
+  background:var(--bg);
+  color:var(--fg);
+  line-height:1.6;
+  min-height:100vh;
+}
+
+/* ── Holographic scan line overlay ── */
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background:repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(88,166,255,0.03) 2px,
+    rgba(88,166,255,0.03) 4px
+  );
+  pointer-events:none;
+  z-index:9999;
+}
+
+/* ── HEADER ── */
+header{
+  background:linear-gradient(135deg, #0d1117 0%, #1a2332 100%);
+  border-bottom:1px solid rgba(88,166,255,0.2);
+  padding:2rem 1rem;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+header::after{
+  content:'';
+  position:absolute;
+  top:-50%;left:-50%;
+  width:200%;height:200%;
+  background:radial-gradient(circle at 30% 50%, rgba(88,166,255,0.06) 0%, transparent 60%);
+  animation:glowPulse 4s ease-in-out infinite;
+}
+@keyframes glowPulse{
+  0%,100%{opacity:0.5}
+  50%{opacity:1}
+}
+header h1{
+  font-family:monospace;
+  font-size:2.2rem;
+  background:linear-gradient(90deg, var(--accent), var(--accent2), var(--blue), var(--purple));
+  background-size:200% auto;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation:gradientShift 3s linear infinite;
+  position:relative;
+  z-index:1;
+}
+@keyframes gradientShift{
+  0%{background-position:0% center}
+  100%{background-position:200% center}
+}
+header .subtitle{
+  font-family:monospace;
+  font-size:0.85rem;
+  color:rgba(88,166,255,0.6);
+  margin-top:0.5rem;
+  position:relative;z-index:1;
+}
+header .version-badge{
+  display:inline-block;
+  background:var(--accent2);
+  color:#fff;
+  font-family:monospace;
+  font-size:0.7rem;
+  padding:2px 10px;
+  border-radius:20px;
+  margin-top:0.5rem;
+  font-weight:700;
+  position:relative;z-index:1;
+}
+
+/* ── STATUS BAR ── */
+#status-bar{
+  background:var(--bg2);
+  border-bottom:1px solid rgba(88,166,255,0.1);
+  padding:0.7rem 1rem;
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:1rem 2rem;
+  font-family:monospace;
+  font-size:0.8rem;
+  position:sticky;
+  top:0;
+  z-index:100;
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+}
+.stat-item{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.stat-label{color:rgba(200,214,229,0.5)}
+.stat-value{color:var(--accent);font-weight:700}
+.stat-bar{
+  width:120px;height:6px;
+  background:var(--bg3);
+  border-radius:3px;
+  overflow:hidden;
+}
+.stat-bar-fill{
+  height:100%;
+  border-radius:3px;
+  transition:width 0.5s ease;
+}
+.xp-fill{background:linear-gradient(90deg, var(--accent), var(--blue))}
+.level-fill{background:linear-gradient(90deg, var(--accent2), var(--purple))}
+
+/* ── NAV TABS ── */
+#tabs{
+  display:flex;
+  gap:0;
+  background:var(--bg2);
+  border-bottom:1px solid rgba(88,166,255,0.1);
+  overflow-x:auto;
+  padding:0 1rem;
+}
+.tab-btn{
+  font-family:monospace;
+  font-size:0.8rem;
+  padding:0.8rem 1.2rem;
+  background:transparent;
+  border:none;
+  border-bottom:2px solid transparent;
+  color:rgba(200,214,229,0.5);
+  cursor:pointer;
+  transition:all 0.2s;
+  white-space:nowrap;
+}
+.tab-btn:hover{color:var(--fg)}
+.tab-btn.active{
+  color:var(--accent);
+  border-bottom-color:var(--accent);
+  text-shadow:0 0 10px rgba(88,166,255,0.3);
+}
+
+/* ── MAIN CONTENT ── */
+main{padding:1.5rem;max-width:1000px;margin:0 auto}
+.tab-content{display:none}
+.tab-content.active{display:block;animation:fadeIn 0.3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── MODULE CARDS ── */
+.module-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:1rem;
+  margin:1rem 0;
+}
+.module-card{
+  background:var(--bg2);
+  border:1px solid rgba(88,166,255,0.1);
+  border-radius:var(--radius);
+  padding:1.2rem;
+  cursor:pointer;
+  transition:all 0.3s;
+  position:relative;
+  overflow:hidden;
+}
+.module-card::before{
+  content:'';
+  position:absolute;
+  top:0;left:0;
+  width:100%;height:3px;
+  background:linear-gradient(90deg, var(--accent), var(--accent2));
+  opacity:0;
+  transition:opacity 0.3s;
+}
+.module-card:hover{
+  border-color:rgba(88,166,255,0.3);
+  transform:translateY(-2px);
+  box-shadow:var(--glow);
+}
+.module-card:hover::before{opacity:1}
+.module-card.completed{
+  border-color:rgba(63,185,80,0.3);
+}
+.module-card.completed::before{
+  background:var(--green);opacity:1;
+}
+.module-card .icon{font-size:2rem;margin-bottom:0.5rem}
+.module-card h3{font-size:1rem;color:#fff;margin-bottom:0.3rem}
+.module-card p{font-size:0.8rem;color:rgba(200,214,229,0.6)}
+.module-card .badge{
+  display:inline-block;
+  font-size:0.65rem;
+  padding:2px 8px;
+  border-radius:10px;
+  margin-top:0.5rem;
+  font-family:monospace;
+}
+.badge-beginner{background:rgba(88,166,255,0.2);color:var(--accent)}
+.badge-intermediate{background:rgba(247,129,102,0.2);color:var(--accent2)}
+.badge-advanced{background:rgba(210,153,34,0.2);color:var(--accent3)}
+.badge-expert{background:rgba(248,81,73,0.2);color:var(--red)}
+
+/* ── LESSON PANEL ── */
+#lesson-panel{
+  background:var(--bg2);
+  border:1px solid rgba(88,166,255,0.15);
+  border-radius:var(--radius);
+  padding:1.5rem;
+  margin:1rem 0;
+  display:none;
+  animation:fadeIn 0.3s ease;
+}
+#lesson-panel.active{display:block}
+#lesson-panel h2{color:var(--accent);font-family:monospace;margin-bottom:1rem}
+#lesson-panel h3{color:#fff;margin:1.2rem 0 0.5rem}
+#lesson-panel h4{color:var(--accent2);margin:1rem 0 0.3rem}
+#lesson-panel p{margin-bottom:0.8rem}
+#lesson-panel ul,#lesson-panel ol{padding-left:1.5rem;margin-bottom:0.8rem}
+#lesson-panel li{margin-bottom:0.3rem}
+#lesson-panel code{
+  background:var(--bg3);
+  color:var(--accent3);
+  padding:2px 6px;
+  border-radius:4px;
+  font-family:monospace;
+  font-size:0.85rem;
+}
+#lesson-panel .port-table{
+  width:100%;
+  border-collapse:collapse;
+  margin:0.8rem 0;
+  font-size:0.85rem;
+}
+#lesson-panel .port-table th{
+  background:var(--bg3);
+  color:var(--accent);
+  padding:8px 12px;
+  text-align:left;
+  font-family:monospace;
+}
+#lesson-panel .port-table td{
+  padding:8px 12px;
+  border-bottom:1px solid rgba(88,166,255,0.05);
+}
+#lesson-panel .port-table tr:hover td{background:rgba(88,166,255,0.03)}
+#lesson-panel .port-table .tcp{color:var(--blue)}
+#lesson-panel .port-table .udp{color:var(--accent2)}
+#lesson-panel .port-table .both{color:var(--accent3)}
+#lesson-panel .info-box{
+  background:rgba(88,166,255,0.05);
+  border-left:3px solid var(--accent);
+  padding:0.8rem 1rem;
+  margin:0.8rem 0;
+  border-radius:0 var(--radius) var(--radius) 0;
+}
+#lesson-panel .warn-box{
+  background:rgba(248,81,73,0.08);
+  border-left:3px solid var(--red);
+  padding:0.8rem 1rem;
+  margin:0.8rem 0;
+  border-radius:0 var(--radius) var(--radius) 0;
+}
+
+/* ── QUIZ ── */
+.quiz-section{margin:1.5rem 0}
+.quiz-question{
+  background:var(--bg3);
+  border-radius:var(--radius);
+  padding:1.2rem;
+  margin-bottom:1rem;
+}
+.quiz-question .q-text{color:#fff;margin-bottom:0.8rem;font-weight:600}
+.quiz-options{display:flex;flex-direction:column;gap:6px}
+.quiz-option{
+  background:var(--bg2);
+  border:1px solid rgba(200,214,229,0.15);
+  border-radius:6px;
+  padding:8px 12px;
+  cursor:pointer;
+  transition:all 0.2s;
+  font-size:0.9rem;
+}
+.quiz-option:hover{border-color:var(--accent);background:rgba(88,166,255,0.05)}
+.quiz-option.selected{border-color:var(--accent);background:rgba(88,166,255,0.1)}
+.quiz-option.correct{border-color:var(--green);background:rgba(63,185,80,0.1)}
+.quiz-option.wrong{border-color:var(--red);background:rgba(248,81,73,0.1)}
+.quiz-result{
+  margin-top:1rem;
+  padding:0.8rem;
+  border-radius:var(--radius);
+  font-weight:600;
+  text-align:center;
+  display:none;
+}
+.quiz-result.pass{
+  display:block;
+  background:rgba(63,185,80,0.1);
+  color:var(--green);
+  border:1px solid rgba(63,185,80,0.3);
+}
+.quiz-result.fail{
+  display:block;
+  background:rgba(248,81,73,0.1);
+  color:var(--red);
+  border:1px solid rgba(248,81,73,0.3);
+}
+.quiz-btn{
+  background:linear-gradient(90deg, var(--accent), var(--blue));
+  color:#fff;
+  border:none;
+  padding:8px 24px;
+  border-radius:var(--radius);
+  cursor:pointer;
+  font-family:monospace;
+  font-weight:700;
+  transition:all 0.2s;
+  margin-top:0.5rem;
+}
+.quiz-btn:hover{box-shadow:var(--glow);transform:translateY(-1px)}
+
+/* ── PORT MATCHING GAME ── */
+#port-game canvas{
+  width:100%;
+  max-width:700px;
+  height:450px;
+  margin:1rem auto;
+  display:block;
+  border:1px solid rgba(88,166,255,0.1);
+  border-radius:var(--radius);
+  background:var(--bg3);
+}
+#port-game .game-controls{
+  display:flex;
+  gap:1rem;
+  justify-content:center;
+  margin-top:1rem;
+}
+.game-btn{
+  background:var(--bg3);
+  border:1px solid rgba(88,166,255,0.2);
+  color:var(--accent);
+  padding:8px 20px;
+  border-radius:var(--radius);
+  cursor:pointer;
+  font-family:monospace;
+  transition:all 0.2s;
+}
+.game-btn:hover{background:rgba(88,166,255,0.1);border-color:var(--accent)}
+#port-score{text-align:center;font-family:monospace;color:var(--accent3);font-size:1.2rem;margin-top:0.5rem}
+
+/* ── GLOSSARY ── */
+#glossary-search{
+  width:100%;
+  padding:10px 14px;
+  background:var(--bg3);
+  border:1px solid rgba(88,166,255,0.15);
+  border-radius:var(--radius);
+  color:#fff;
+  font-family:monospace;
+  margin-bottom:1rem;
+  font-size:0.9rem;
+}
+#glossary-search::placeholder{color:rgba(200,214,229,0.3)}
+#glossary-search:focus{outline:none;border-color:var(--accent);box-shadow:var(--glow)}
+.glossary-list{display:grid;grid-template-columns:1fr;gap:0.5rem}
+.glossary-item{
+  background:var(--bg2);
+  border:1px solid rgba(88,166,255,0.05);
+  border-radius:var(--radius);
+  padding:0.8rem 1rem;
+  transition:all 0.2s;
+  cursor:pointer;
+}
+.glossary-item:hover{border-color:rgba(88,166,255,0.2);background:var(--bg3)}
+.glossary-item .term{
+  color:var(--accent);
+  font-family:monospace;
+  font-weight:700;
+}
+.glossary-item .definition{
+  color:rgba(200,214,229,0.7);
+  font-size:0.85rem;
+  margin-top:4px;
+  display:none;
+}
+.glossary-item.open .definition{display:block}
+
+/* ── SCENARIO CHALLENGES ── */
+.scenario-card{
+  background:var(--bg2);
+  border:1px solid rgba(247,129,102,0.15);
+  border-radius:var(--radius);
+  padding:1.2rem;
+  margin-bottom:1rem;
+  transition:all 0.3s;
+}
+.scenario-card:hover{border-color:rgba(247,129,102,0.3)}
+.scenario-card .s-title{color:var(--accent2);font-weight:700;font-family:monospace;margin-bottom:0.5rem}
+.scenario-card .s-desc{font-size:0.9rem;margin-bottom:0.8rem}
+.scenario-card .s-hint{
+  background:rgba(210,153,34,0.08);
+  border-left:3px solid var(--accent3);
+  padding:0.5rem 0.8rem;
+  font-size:0.8rem;
+  border-radius:0 var(--radius) var(--radius) 0;
+  display:none;
+}
+.scenario-card .s-hint.show{display:block}
+.scenario-card .s-answer{
+  background:rgba(63,185,80,0.05);
+  border-left:3px solid var(--green);
+  padding:0.5rem 0.8rem;
+  font-size:0.8rem;
+  border-radius:0 var(--radius) var(--radius) 0;
+  display:none;
+  margin-top:0.5rem;
+}
+.scenario-card .s-answer.show{display:block}
+.scenario-card .s-toggle{
+  background:transparent;
+  border:1px solid rgba(200,214,229,0.2);
+  color:var(--fg);
+  padding:4px 12px;
+  border-radius:6px;
+  cursor:pointer;
+  font-family:monospace;
+  font-size:0.75rem;
+  transition:all 0.2s;
+  margin-right:6px;
+}
+.scenario-card .s-toggle:hover{background:rgba(200,214,229,0.1)}
+
+/* ── ACHIEVEMENTS ── */
+.achievement-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:0.8rem;
+}
+.achievement-badge{
+  background:var(--bg2);
+  border:1px solid rgba(200,214,229,0.1);
+  border-radius:var(--radius);
+  padding:1rem;
+  text-align:center;
+  transition:all 0.3s;
+  opacity:0.3;
+  filter:grayscale(1);
+}
+.achievement-badge.unlocked{
+  opacity:1;
+  filter:grayscale(0);
+  border-color:rgba(88,166,255,0.3);
+  box-shadow:var(--glow);
+}
+.achievement-badge .a-icon{font-size:2rem;margin-bottom:0.3rem}
+.achievement-badge .a-name{font-size:0.8rem;color:#fff;font-weight:600}
+.achievement-badge .a-desc{font-size:0.7rem;color:rgba(200,214,229,0.5);margin-top:2px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:600px){
+  header h1{font-size:1.3rem}
+  header{padding:1.2rem 0.8rem}
+  header .subtitle{font-size:0.7rem}
+  #status-bar{font-size:0.65rem;gap:0.3rem;padding:0.5rem 0.5rem;flex-wrap:nowrap;overflow-x:auto}
+  .stat-bar{width:60px}
+  .tab-btn{font-size:0.65rem;padding:0.5rem 0.6rem}
+  .module-grid{grid-template-columns:1fr}
+  .achievement-grid{grid-template-columns:repeat(2,1fr)}
+  main{padding:0.8rem}
+  #lesson-panel{padding:1rem}
+  .port-table{font-size:0.75rem}
+  .port-table th,.port-table td{padding:4px 6px}
+  .quiz-question{padding:0.8rem}
+  .quiz-option{font-size:0.8rem;padding:6px 8px}
+  .scenario-card{padding:0.8rem}
+  #port-game canvas{height:350px}
+  .glossary-item{padding:0.6rem 0.8rem}
+  .glossary-item .term{font-size:0.85rem}
+  .glossary-item .definition{font-size:0.8rem}
+}
+@media(max-width:400px){
+  #status-bar{font-size:0.55rem}
+  .tab-btn{font-size:0.6rem;padding:0.4rem 0.5rem}
+  .stat-bar{width:40px}
+  #port-game canvas{height:300px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>▣ uniFLOW NETWORKING DOJO v4</h1>
+  <div class="subtitle">══ Master Print Networking — Canon Certified Glossary Edition ══</div>
+  <div class="version-badge">⚡ v4 — METHODOLOGY + AUTH + MOBILE + PHYSICAL + SECURITY ⚡</div>
+</header>
+
+<div id="status-bar">
+  <div class="stat-item">
+    <span class="stat-label">LEVEL</span>
+    <span class="stat-value" id="level-display">1</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-label">XP</span>
+    <div class="stat-bar"><div class="stat-bar-fill xp-fill" id="xp-bar" style="width:0%"></div></div>
+    <span class="stat-value" id="xp-text">0 / 100</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-label">MODULES</span>
+    <span class="stat-value" id="module-count">0/18</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-label">⭐ ACHIEVEMENTS</span>
+    <span class="stat-value" id="ach-count">0/11</span>
+  </div>
+</div>
+
+<div id="tabs">
+  <button class="tab-btn active" data-tab="modules">📚 MODULES</button>
+  <button class="tab-btn" data-tab="portgame">🔌 PORT MATCH</button>
+  <button class="tab-btn" data-tab="scenarios">🎯 SCENARIOS</button>
+  <button class="tab-btn" data-tab="glossary">📖 GLOSSARY</button>
+  <button class="tab-btn" data-tab="achievements">🏆 AWARDS</button>
+</div>
+
+<main>
+  <!-- ══════ MODULES TAB ══════ -->
+  <div class="tab-content active" id="tab-modules">
+    <p style="margin-bottom:1rem;color:rgba(200,214,229,0.6)">Complete modules to earn XP. Each unlocks quiz challenges. Click any card to start.</p>
+    <div class="module-grid" id="module-grid"></div>
+    <div id="lesson-panel"></div>
+  </div>
+
+  <!-- ══════ PORT MATCHING GAME ══════ -->
+  <div class="tab-content" id="tab-portgame">
+    <h2 style="font-family:monospace;color:var(--accent);margin-bottom:0.5rem">🔌 PORT MATCHING CHALLENGE</h2>
+    <p style="color:rgba(200,214,229,0.6);margin-bottom:1rem">Drag lines from the protocol to the correct port number. Match all to win!</p>
+    <div id="port-game">
+      <canvas id="port-canvas"></canvas>
+      <div id="port-score">⚡ 0 / 8 matched</div>
+      <div class="game-controls">
+        <button class="game-btn" onclick="resetPortGame()">🔄 New Round</button>
+        <button class="game-btn" onclick="checkPortMatches()">✅ Check</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ SCENARIOS TAB ══════ -->
+  <div class="tab-content" id="tab-scenarios">
+    <h2 style="font-family:monospace;color:var(--accent2);margin-bottom:0.5rem">🎯 ON-SITE SCENARIOS</h2>
+    <p style="color:rgba(200,214,229,0.6);margin-bottom:1rem">Real deployment troubleshooting challenges. Use what you've learned.</p>
+    <div id="scenario-list"></div>
+  </div>
+
+  <!-- ══════ GLOSSARY TAB ══════ -->
+  <div class="tab-content" id="tab-glossary">
+    <h2 style="font-family:monospace;color:var(--accent);margin-bottom:0.5rem">📖 OFFICIAL uniFLOW 2026.1 GLOSSARY</h2>
+    <p style="color:rgba(200,214,229,0.6);margin-bottom:1rem">Sourced directly from the NT-ware Canon User Manual. Click any term to expand.</p>
+    <input type="text" id="glossary-search" placeholder="🔍 Search glossary terms..." oninput="filterGlossary(this.value)">
+    <div class="glossary-list" id="glossary-list"></div>
+  </div>
+
+  <!-- ══════ ACHIEVEMENTS TAB ══════ -->
+  <div class="tab-content" id="tab-achievements">
+    <h2 style="font-family:monospace;color:var(--accent3);margin-bottom:0.5rem">🏆 ACHIEVEMENTS</h2>
+    <p style="color:rgba(200,214,229,0.6);margin-bottom:1rem">Earn badges by completing modules, acing quizzes, and mastering port matching.</p>
+    <div class="achievement-grid" id="achievement-grid"></div>
+  </div>
+</main>
+
+<script>
+// ══════════════════════════════════════════
+// GAME STATE
+// ══════════════════════════════════════════
+const state = {
+  xp: 0,
+  level: 1,
+  xpPerLevel: 100,
+  completedModules: new Set(),
+  achievements: new Set(),
+  portMatches: 0,
+  currentLesson: null,
+};
+
+// ══════════════════════════════════════════
+// MODULE DATA (10 expanded modules)
+// ══════════════════════════════════════════
+const modules = [
+  {id:'m1',icon:'🌐',title:'IP Addressing & Subnets',level:'beginner',
+   desc:'Learn IPv4, subnet masks, gateways — the foundation of all network communication.',
+   xp:15,
+   quiz:[
+     {q:'What does a subnet mask of /24 (255.255.255.0) mean?',
+      opts:['254 usable addresses','16,384 usable addresses','65,534 usable addresses','2 usable addresses'],
+      ans:0},
+     {q:'What is a gateway?',
+      opts:['A firewall rule','A router connecting networks','A DNS server','A printer queue'],
+      ans:1},
+     {q:'What is the private IP range for Class A?',
+      opts:['192.168.0.0/16','172.16.0.0/12','10.0.0.0/8','169.254.0.0/16'],
+      ans:2},
+   ]},
+  {id:'m2',icon:'🚪',title:'Ports — The Doors',level:'beginner',
+   desc:'Understand ports 0-65535 — the apartment doors of networking. This is the #1 concept for uniFLOW deployments.',
+   xp:20,
+   quiz:[
+     {q:'What does the notation 192.168.3.10:443 mean?',
+      opts:['IP address : MAC address','IP address : Port number','Hostname : Domain','Network : Subnet'],
+      ans:1},
+     {q:'Which port range contains 9100 (RAW printing)?',
+      opts:['Well-known (0-1023)','Registered (1024-49151)','Ephemeral (49152-65535)','Reserved (60000+)'],
+      ans:1},
+     {q:'How many numbers define a single network connection?',
+      opts:['2','3','4','1'],
+      ans:2,
+      explain:'Source IP : Source Port → Destination IP : Destination Port'},
+   ]},
+  {id:'m3',icon:'📞',title:'TCP vs UDP',level:'beginner',
+   desc:'Phone calls vs postcards — reliable printing data vs fast device discovery. Know when to use each.',
+   xp:15,
+   quiz:[
+     {q:'Why does uniFLOW use TCP for print jobs?',
+      opts:['It\'s faster','It guarantees delivery and ordering','It uses less bandwidth','Firewalls prefer TCP'],
+      ans:1},
+     {q:'What protocol does SNMP use and why?',
+      opts:['TCP — for reliability','TCP — for encryption','UDP — for speed and low overhead','ICMP — for device discovery'],
+      ans:2},
+   ]},
+  {id:'m4',icon:'🔒',title:'SSL/TLS & Certificates',level:'intermediate',
+   desc:'Official uniFLOW: TLS 1.2 minimum, images on devices use TLS 1.3. Certificate chain troubleshooting.',
+   xp:20,
+   quiz:[
+     {q:'What is the minimum TLS version for uniFLOW Online?',
+      opts:['TLS 1.0','TLS 1.1','TLS 1.2','Any version is fine'],
+      ans:2},
+     {q:'What happens when a device\'s SSL certificate is expired?',
+      opts:['Nothing, it still works','Connections fail with certificate errors','TLS falls back to 1.0','The device auto-renews it'],
+      ans:1},
+   ]},
+  {id:'m5',icon:'🖨️',title:'RAW 9100 & LPR',level:'intermediate',
+   desc:'Direct print protocols. How uniFLOW sends jobs to printers via TCP port 9100 and LPD port 515.',
+   xp:20,
+   quiz:[
+     {q:'What is the security problem with RAW port 9100?',
+      opts:['It\'s slow','No authentication or encryption','It only works with Canon devices','It uses UDP'],
+      ans:1},
+     {q:'In uniFLOW On-Prem Step 5, what port is default for TCP/IP output printers?',
+      opts:['515','631','9100','445'],
+      ans:2},
+   ]},
+  {id:'m6',icon:'🔌',title:'SNMP & CPCA',level:'intermediate',
+   desc:'How uniFLOW discovers and monitors devices. SNMP port 161/UDP for basics, CPCA ports 47545+ for deep data.',
+   xp:25,
+   quiz:[
+     {q:'What port does CPCA primarily use?',
+      opts:['UDP 161','UDP 47545','TCP 443','TCP 9100'],
+      ans:1},
+     {q:'What is the SNMP community string?',
+      opts:['The device model number','The SNMP password','The MIB identifier','The port number'],
+      ans:1},
+   ]},
+  {id:'m7',icon:'🗄️',title:'SMB & Scan-to-Folder',level:'intermediate',
+   desc:'SMB port 445 for Windows file sharing. Scan-to-folder failures — the SMB version mismatch problem.',
+   xp:15,
+   quiz:[
+     {q:'What port does direct SMB use?',
+      opts:['139','445','445 and 139 both','80'],
+      ans:1},
+     {q:'Why do older MFPs fail to scan to a modern Windows share?',
+      opts:['UDP is blocked','SMB version mismatch (SMB 1.0 disabled)','Wrong IP address','DNS resolution failure'],
+      ans:1},
+   ]},
+  {id:'m8',icon:'🧱',title:'Firewalls, VLANs & Proxies',level:'advanced',
+   desc:'The #1 deployment blocker. Firewall rules, VLAN segmentation, and proxy bypass for uniFLOW cloud URLs.',
+   xp:30,
+   quiz:[
+     {q:'Why is VLAN segmentation a common uniFLOW deployment problem?',
+      opts:['VLANs don\'t support TCP','Firewall rules between VLANs block needed ports','VLANs use different IP versions','printers can\'t use VLANs'],
+      ans:1},
+     {q:'Which uniFLOW Online domains need proxy bypass?',
+      opts:['*.google.com','*.nt-ware.com and *.uniflowonline.com','*.microsoft.com','*.canon.com'],
+      ans:1},
+   ]},
+  {id:'m9',icon:'📡',title:'DNS, DHCP & NAT',level:'advanced',
+   desc:'DNS resolution failures = everything broken. DHCP leases can cause printer IP changes. NAT and uniFLOW Online\'s outbound-only design.',
+   xp:25,
+   quiz:[
+     {q:'Why does a printer IP change break uniFLOW?',
+      opts:['uniFLOW uses MAC addresses','Printers must have static IPs in uniFLOW','DNS caches the old IP','The printer needs a reboot'],
+      ans:1},
+     {q:'Why does NAT work for uniFLOW Online without special config?',
+      opts:['uniFLOW uses IPv6','The MFD connects OUT to the cloud (outbound works through NAT)','NAT preserves port numbers','Canon devices have built-in NAT'],
+      ans:1},
+   ]},
+  {id:'m10',icon:'⚙️',title:'Device Agents & Deployment',level:'expert',
+   desc:'Official glossary terms: Device Agent types, CPCA Spooler Control, Counter Readers, Hotfolder Monitor, and all port requirements.',
+   xp:35,
+   quiz:[
+     {q:'What does the CPCA Spooler Control Device Agent do?',
+      opts:['Reads printer counters','Controls the built-in spooler of Canon MFPs via CPCA','Discovers printers on the network','Manages print driver updates'],
+      ans:1},
+     {q:'What is the Hotfolder Monitor used for?',
+      opts:['Printing from a USB drive','Monitoring a folder for incoming print files','Tracking scan jobs','Managing print queues'],
+      ans:1},
+     {q:'What ping method do Device Agents use before contacting a device?',
+      opts:['TCP ping on port 80','ICMP ping','ARP broadcast','UDP ping on port 161'],
+      ans:1,
+      explain:'From the official manual: "Before establishing contact via HTML, the Device Agent will check whether the device is online with an ICMP ping."'},
+   ]},
+  {id:'m11',icon:'📝',title:'Printer Languages — PostScript, PCL & UFR II',level:'intermediate',
+   desc:'The language your print job speaks. Pick wrong = garbage output. PCL, PostScript, UFR II — what they are and when to use each.',
+   xp:25,
+   quiz:[
+     {q:'Which printer language is a full programming language, best for complex graphics and prepress?',
+      opts:['PCL 6','PostScript','UFR II','PCL XL'],
+      ans:1},
+     {q:'What is Canon\'s proprietary printer language?',
+      opts:['PostScript','PCL 6','UFR II (Ultra Fast Rendering)','PCL XL'],
+      ans:2},
+     {q:'When would you switch from a Canon UFR II driver to a PCL 6 driver?',
+      opts:['Never — Canon devices only use UFR II','When the customer reports missing font support or compatibility issues','When printing photos','When printing from macOS'],
+      ans:1},
+     {q:'What does PDL stand for?',
+      opts:['Printer Document Language','Page Description Language','Print Data Language','PostScript Description Language'],
+      ans:1},
+     {q:'Which language processes rendering on the PC side (load-balancing with the printer)?',
+      opts:['PostScript — all processing on printer','PCL 6 — all processing on printer','UFR II — splits processing between PC and printer','PCL 5 — all processing on printer'],
+      ans:2},
+   ]},
+  {id:'m12',icon:'🖥️',title:'Printer Drivers — V3 vs V4 & Canon Drivers',level:'advanced',
+   desc:'The software that translates your document into printer language. V3 vs V4, Canon Generic vs type-specific, Group Policy deployment.',
+   xp:30,
+   quiz:[
+     {q:'What is the main difference between a V3 and V4 Windows printer driver?',
+      opts:['V3 is older, V4 is newer with a simpler and safer driver model','V3 is 64-bit, V4 is 32-bit','V3 supports color, V4 is monochrome','There is no difference'],
+      ans:0},
+     {q:'What happens if you install the wrong printer driver on a Windows print server?',
+      opts:['Nothing — Windows auto-detects','Print jobs may fail, garbled output, or driver conflicts','The printer rewrites its firmware','The spooler crashes permanently'],
+      ans:1},
+     {q:'Why would you use the Canon Generic PCL 6 Driver instead of a device-specific driver?',
+      opts:['It\'s faster','It works across multiple Canon model families for fleet standardization','It supports more finishing options','It\'s the only one available for network printers'],
+      ans:1},
+     {q:'What tool do you use for printer driver deployment across an enterprise?',
+      opts:['Print Management Console (printmanagement.msc) with Group Policy','Group Policy Management Editor only','PowerShell Set-Printer cmdlet only','All of the above — multiple methods work'],
+      ans:3},
+   ]},
+  {id:'m13',icon:'🗂️',title:'Print Management — Queues, Spooler & Job Routing',level:'advanced',
+   desc:'How print jobs move from user to paper. Queues, spoolers, Rule-Based Routing, CRQM, DRQM — the anatomy of enterprise print.',
+   xp:30,
+   quiz:[
+     {q:'What is a print queue in Windows?',
+      opts:['The physical printer hardware','A logical destination for print jobs, with a driver and port assigned','The spooler service (Spoolsv.exe)','The printer IP address'],
+      ans:1},
+     {q:'What is the Windows Print Spooler service?',
+      opts:['A service that manages faxing','The service (Spoolsv.exe) that receives, processes, and sends print jobs to the printer','A driver installation tool','A network discovery service'],
+      ans:1},
+     {q:'What does CRQM (Collective Release Queue Management) allow users to do?',
+      opts:['Print from any device at any location','Collect print jobs from any device connected to any print server in the collective','Route jobs based on page count','Email completed print notifications'],
+      ans:1},
+     {q:'What is DRQM (Distributed Release Queue Management)?',
+      opts:['Same as CRQM but for local networks','Allows follow-me printing across geographically distributed sites worldwide','A driver deployment tool','A spooler monitoring service'],
+      ans:1},
+     {q:'RPS (Remote Print Server) is an add-on license that does what?',
+      opts:['Prints remotely from home','Collects printer accounting info on a remote server and uploads to central uniFLOW','Manages remote driver updates','Provides VPN access for printing'],
+      ans:1},
+   ]},
+  {id:'m14',icon:'🕵️',title:'Troubleshooting Methodology',level:'intermediate',
+   desc:'A repeatable 5-step process for any printer/network issue. Stop guessing and start diagnosing.',
+   xp:25,
+   quiz:[
+     {q:'What is the FIRST step in the troubleshooting methodology?',
+      opts:['Reboot everything','Gather Information','Swap the cable','Call the vendor'],
+      ans:1},
+     {q:'After isolating the issue, what comes next?',
+      opts:['Apply a fix','Escalate to Level 2','Analyze Logs and Events','Document the solution'],
+      ans:2},
+     {q:'Why is documenting the fix important?',
+      opts:['So your boss knows you worked','For the next engineer facing the same issue - and for customer records','To prove the customer was wrong','It is not important'],
+      ans:1},
+     {q:'What tool should you grab FIRST for a printer not printing call?',
+      opts:['A new printer','Event Viewer + ping + the methodology','The firmware update file','The customer credit card'],
+      ans:1},
+   ]},
+  {id:'m15',icon:'🔌',title:'Physical Connectivity & Cabling',level:'beginner',
+   desc:'Ethernet cables, USB, power, panel menus, and what those blinking lights mean.',
+   xp:15,
+   quiz:[
+     {q:'What does a solid green link light on a printer NIC mean?',
+      opts:['The printer is printing','Physical link is established (Layer 1 is up)','The network is slow','Firmware update is needed'],
+      ans:1},
+     {q:'What error code category starts with E on most Canon MFPs?',
+      opts:['Paper jam','Service/Engine error','Network error','Toner low warning'],
+      ans:1},
+     {q:'What is the FIRST thing to check when a printer has no display?',
+      opts:['Call Canon support','Power cable is plugged in and outlet works','Network cable','Replace the control panel'],
+      ans:1},
+   ]},
+  {id:'m16',icon:'🔐',title:'Authentication & Access Control',level:'advanced',
+   desc:'How users prove who they are at the MFD. Kerberos, NTLM, card auth, PIN auth, certificate-based.',
+   xp:30,
+   quiz:[
+     {q:'What protocol does Windows AD use as its default authentication method?',
+      opts:['NTLM','Kerberos','LDAP','RADIUS'],
+      ans:1},
+     {q:'Why might card authentication (CAC/PIV) fail at the MFD?',
+      opts:['The card reader is not configured for MEAP','The card certificate chain cannot be validated','The driver is wrong','The MFD is in power save mode'],
+      ans:1},
+     {q:'In uniFLOW, what happens when AD authentication fails at the MFD touch panel?',
+      opts:['The MFD reboots','User sees Login failed and cannot access functions','A fallback local account is used','The job prints anyway'],
+      ans:1},
+     {q:'What is SSO in the context of Canon MFPs?',
+      opts:['Single Sign-On - log in once until logout','A standalone server','A printer driver type','An encryption protocol'],
+      ans:0},
+   ]},
+  {id:'m17',icon:'📱',title:'Mobile Printing & Cloud',level:'intermediate',
+   desc:'Printing from phones, tablets, and remote locations. Mopria, AirPrint, Canon Print Business.',
+   xp:20,
+   quiz:[
+     {q:'What printing protocol does Apple AirPrint use as its foundation?',
+      opts:['RAW 9100','IPP (Internet Printing Protocol)','SMB','LPR'],
+      ans:1},
+     {q:'What is Mopria?',
+      opts:['A Samsung printing app','A cross-vendor standard for mobile printing','Canon cloud printing service','A wireless cable'],
+      ans:1},
+     {q:'To use Canon Print Business from outside, the MFD must be...',
+      opts:['Connected via VPN','Reachable over internet or registered with uniFLOW Online','On the same subnet','Running special firmware'],
+      ans:1},
+     {q:'What is Microsoft Universal Print?',
+      opts:['A printer that works with any OS','A cloud-based print infrastructure replacing on-prem print servers','A universal printer driver','A print queue for any PDL'],
+      ans:1},
+   ]},
+  {id:'m18',icon:'🛡️',title:'Security Hardening',level:'advanced',
+   desc:'Default passwords, firmware updates, port lockdowns, and why the #1 printer hack starts with an unsecured MFD.',
+   xp:25,
+   quiz:[
+     {q:'What is the single most common security issue on a newly deployed MFD?',
+      opts:['Outdated TLS version','Default admin credentials not changed','Open Wi-Fi','No firewall configured'],
+      ans:1},
+     {q:'What port should be blocked at the firewall to prevent unauthorized RAW printing?',
+      opts:['TCP 443','TCP 9100','UDP 161','TCP 445'],
+      ans:1},
+     {q:'Why should you keep MFD firmware up to date?',
+      opts:['For new features only','Security patches for known vulnerabilities','To improve print speed','It is not important for security'],
+      ans:1},
+     {q:'What is the minimum TLS version for secure communication in uniFLOW Online?',
+      opts:['TLS 1.0','TLS 1.1','TLS 1.2','Any version is acceptable'],
+      ans:2},
+   ]},
+];
+
+// ══════════════════════════════════════════
+// SCENARIO DATA (8 real deployment scenarios)
+// ══════════════════════════════════════════
+const scenarios = [
+  {title:'🔥 The Silent Printer',
+   desc:'A Canon iR-ADV is discovered by IWEMC — it appears in the list — but the uniFLOW server reports it as "Offline." The MFD can ping the uniFLOW server. What\'s the most likely cause?',
+   hint:'Check the firewall between the VLANs — ICMP (ping) may be allowed while a specific port is blocked.',
+   answer:'The CPCA port (UDP 47545) is blocked between the printer VLAN and the server VLAN. ICMP is allowed (ping works), but CPCA is needed for uniFLOW to get status updates. Fix: Open UDP 47545 from MFD→Server.'},
+  {title:'🔐 Scan-to-Folder Silent Death',
+   desc:'User scans a document at the MFD. It says "Complete." But the file never arrives at the shared folder \\\\fileserver\\scans. What\'s the #1 suspect?',
+   hint:'SMB has gone through several versions. Old devices speak an outdated dialect.',
+   answer:'SMB version mismatch. WinServer 2022 requires SMB 3.0 with encryption. The older MFD only supports SMB 1.0 (disabled by default on modern Windows). Fix: Enable SMB 2.0/3.0 fallback on the MFD, or set up a scan-to-email alternative.'},
+  {title:'🌐 The Proxy Prisoner',
+   desc:'A customer deployed uniFLOW Online. Printers register fine at the office. But one branch office\'s MFDs keep going offline. All other internet services work. What\'s the pattern?',
+   hint:'Enterprise branches often route ALL traffic through a proxy — one that expects authentication.',
+   answer:'The branch uses an authenticating proxy. The MFD can\'t provide proxy credentials, so its outbound connection to *.uniflowonline.com is intercepted and blocked. Fix: Add *.nt-ware.com, *.uniflowonline.com, and device.c-cdsknn.net to the proxy bypass list.'},
+  {title:'🎭 The DHCP Ghost',
+   desc:'After a weekend power outage, 10 MFDs at a school can\'t print. Before the outage, everything worked. No config changes were made. Where do you start?',
+   hint:'What changes when the power comes back on, that stays the same for servers but changes for clients?',
+   answer:'The MFDs are on DHCP. After the outage, the DHCP server assigned them new IPs (lease was lost during downtime). uniFLOW still references the old IPs. Fix: Reserve static IPs for all MFDs in the DHCP server, or configure them as static on the device.'},
+  {title:'🕸️ The Certificate Ghost',
+   desc:'uniFLOW Smart Client can\'t connect to the server. The server is up, pingable, and HTTPS responses come back — but the client reports "Connection not secure" and refuses. What\'s wrong?',
+   hint:'Look at the certificate. Who signed it?',
+   answer:'The uniFLOW server uses a self-signed certificate (or expired CA-signed one). Smart Client requires a trusted certificate chain. Fix: Install a proper CA-signed certificate, or add the self-signed cert to the client\'s trusted root store.'},
+  {title:'🔄 The NAT Surprise',
+   desc:'A customer wants remote workers to release print jobs at the office MFD via uniFLOW On-Prem. The office has a single public IP. Why doesn\'t it work out of the box?',
+   hint:'There\'s a difference between outbound and inbound connections through NAT.',
+   answer:'NAT handles outbound connections naturally. But for the MFD to connect TO uniFLOW server FROM the internet, you need port forwarding on the office router: map public IP:443 → uniFLOW server:443. Plus a firewall rule to allow it. Multi-factor auth required for security.'},
+  {title:'📊 The Missing Counters',
+   desc:'The customer\'s billing department notices counter readings haven\'t updated for 3 days on some MFDs. The MFDs are online and printing fine. uniFLOW shows no errors. What\'s likely?',
+   hint:'Counter reading uses a different protocol than printing. If one works but the other doesn\'t...',
+   answer:'SNMP (UDP 161) is blocked for those specific MFDs. Print jobs use TCP 9100 or HTTPS — those work. But SNMP queries for page counters are silently dropped. Fix: Check firewall rules for UDP 161 from uniFLOW server to the affected MFDs.'},
+  {title:'🏢 The VLAND Maze',
+   desc:'New building, same company. They moved 20 MFDs to a new wing. The printers are on VLAN 100. The uniFLOW server is on VLAN 10. Segments are routed through a firewall. Nothing works. What do you need?',
+   hint:'Count the data paths. Every arrow in the architecture diagram is a firewall requirement.',
+   answer:'You need firewall rules allowing traffic between VLAN 100 and VLAN 10 on: TCP 443 (authentication, job release), UDP 47545 (CPCA status), UDP 161 (SNMP discovery), TCP 9100 (if sending print jobs directly), and TCP 445 (scan-to-folder if on VLAN 100). Also ensure DNS can resolve across VLANs.'},
+  {title:'🖨️ The Wrong Language',
+  desc:'A customer deployed a fleet of Canon imageRUNNER ADVANCE devices. Some users print from a specialized accounting application that uses PostScript exclusively. The Canon Generic UFR II driver is installed everywhere. Accounting users get garbled pages — symbols instead of text. What\'s happening and how do you fix it?',
+  hint:'A printer language is like a foreign accent. If you speak French to someone who only understands Spanish...',
+  answer:'The accounting app generates PostScript data, but the UFR II driver doesn\'t understand it. Fix: (a) Install the Canon Generic PostScript driver on the accounting users\' machines, or (b) configure a separate print queue with the PostScript driver pointed at the same device. Many Canon MFPs can auto-detect PDL if the data is wrapped correctly.'},
+  {title:'🔌 The Spooler Hang',
+  desc:'A Windows print server crashes every Thursday afternoon at 2 PM. Event Viewer shows Spoolsv.exe consuming 8GB RAM before dying. The queue has 400+ pending jobs. Users resubmit when jobs disappear, making it worse. What\'s the root cause and the two-step fix?',
+  hint:'Large print jobs + queue not clearing + users compounding the problem = death spiral.',
+  answer:'Root cause: A single massive PDF (500+ pages, high-res graphics) held as EMF in the spooler. Each resubmission adds more. Fix: (1) Clear stuck jobs (net stop spooler and delete PRINTERS folder, net start spooler). (2) Change spooler to "Start printing immediately" to prevent EMF accumulation. Long-term: Switch large-document users to RAW mode to render on client instead of server.'},
+  {title:'🆔 The Authentication Lockout',
+  desc:'A hospital has 30 Canon MFPs with card reader authentication. Users swipe badges to release print jobs. On Monday morning, 50+ nurses report they cannot print. The error says "Authentication failed." IT says AD is fine. What is the likely cause and why Monday morning?',
+  hint:'Think about what happens over a weekend. AD accounts are fine. The MFDs...',
+  answer:'The MFD clocks drifted over the weekend (no NTP sync). When users swiped badges, Kerberos authentication failed because the device clock was more than 5 minutes off from the domain controller. Fix: Set NTP servers on all MFDs via RUI (Network Settings > NTP). Prevention: Add NTP config as a deployment step in every new install.'},
+  {title:'📱 The Mobile Print Mystery',
+  desc:'A law firm installed new Canon MFPs. Attorneys can print from computers, but cannot print from iPhones/iPads. MFPs do not appear in iOS Print dialog. AirPrint is supported. Everything on same Wi-Fi. What is happening?',
+  hint:'AirPrint uses a protocol to discover printers. What happens when that protocol hits a network boundary?',
+  answer:'AirPrint uses mDNS/Bonjour for discovery (port 5353 UDP). mDNS is link-local - it does not cross VLANs. Corporate networks segment Wi-Fi and wired into different subnets/VLANs. MFPs on wired VLAN, iPhones on Wi-Fi VLAN. Fix: (1) Enable mDNS reflector/relay. Or (2) Configure IPP printing with the MFD IP directly. Or (3) Move MFPs to Wi-Fi VLAN.'},
+  {title:'🛡️ The Open Door',
+  desc:'A new customer has 15 Canon MFPs deployed six months ago by another vendor. The uniFLOW server and printers communicate fine. But during a security review, the customer\'s IT team finds all 15 MFPs have the factory-default admin password, SNMP community "public" enabled, and port 9100 open to the entire LAN. What should you do as immediate actions?',
+  hint:'Think in order of risk: What gives an attacker the most access first? Then lock down the rest.',
+  answer:'Immediate priority: (1) Change admin passwords on all 15 MFDs. This prevents RUI takeover. (2) Restrict SNMP community string to a read-only custom value known only to uniFLOW. (3) Create a firewall rule limiting TCP 9100 access to the print server IP only. (4) Check firmware version and update if it is more than 12 months old. (5) Document and schedule for a full security audit every quarter. Deployers should do this at install time, not retroactively.'},
+];
+
+// ══════════════════════════════════════════
+// COMPLETE OFFICIAL GLOSSARY (from uniFLOW 2026.1 Manual)
+// ══════════════════════════════════════════
+const glossaryTerms = [
+  // ═══ OFFICIAL uniFLOW 2026.1 GLOSSARY — Complete ═══
+  // A
+  {term:'ACE (Access Control Entry)',def:'Access Control Entries can either be users or groups of users, or printers. After selection of an ACE, you can decide to add it to the Access Allowed List or the Access Denied List, depending on the permission you would like to give the user or group in question.'},
+  {term:'ACL (Access Control List)',def:'An ACL consists of Access Control Entries (ACE). Access Control Entries can either be users or groups of users, or printers. After selection of an ACE, you can decide to add it to the Access Allowed List or the Access Denied List, depending on the permission you would like to give the user, group, or printer in question.'},
+  {term:'AD (Active Directory)',def:'Active directory is a Windows directory service included in most Windows server systems. It stores information of objects on the network within a database. Most commonly, data about users, printer queues or network configuration is stored.'},
+  {term:'AES (Advanced Encryption Standard)',def:'One of the most popular algorithms used in symmetric key cryptography. AES has a fixed block size of 128 bits, and a key size of 128, 192, or 256 bits. AES is part of the ISO/IEC 18033/3 standard.'},
+  {term:'AMS (Access Management System)',def:'A system developed by Canon that provides access management possibilities on a per feature basis for imageRUNNER devices.'},
+  {term:'ApjPrint',def:'Print processor used by uniFLOW to monitor print jobs in a Windows Spooler. Includes functionality to automatically start uniFLOW services and auto-print jobs if the server or database cannot be reached.'},
+  // C
+  {term:'CAC (Common Access Card)',def:'A standard identification card issued by the US DoD for general identification and for authentication.'},
+  {term:'CAPT (Canon Advanced Printing Technology)',def:'Enhances increasingly powerful PC CPUs, sending rendering data processed by the PC to the printer for printing. Reduces load on the printer CPU.'},
+  {term:'CPCA (Common Peripheral Controlling Architecture)',def:'A proprietary communication protocol developed by Canon to communicate with multi-functional devices (MFP). Controls all MFP functionality including printing, copying, scanning, and mailbox management. CPCA is implemented in MEAP as a Java class library. Functions include copy/scan/print job submission, job management (cancel/hold/resume), device management (status, settings), log management (job history), and mailbox/document management.'},
+  {term:'CRQM (Collective Release Queue Management)',def:'In uniFLOW you can combine print servers into a collective. With CRQM, users are able to collect each of their print jobs from any device connected to a print server in the collective.'},
+  {term:'CSI (Connectivity Services Interface)',def:'A connector which can be accessed through different plug-ins. Used in Workflow Elements of scan workflows targeted to scan to different document management systems.'},
+  {term:'CUPS (Common Unix Printing System)',def:'A modular printing system for Unix-like operating systems that allows a computer to act as a print server. Accepts print jobs from clients, processes them, and sends them to the appropriate printer.'},
+  // D
+  {term:'DDT (Device Discovery Task)',def:'A uniFLOW function used to configure a periodic scan of one or more network segments to find and automatically configure printers.'},
+  {term:'DHCP (Dynamic Host Configuration Protocol)',def:'A protocol for assigning dynamic IP addresses to devices on a network. With dynamic addressing, a device can have a different IP address every time it connects to the network.'},
+  {term:'DIF (Device Information File)',def:'uniFLOW is based on a DIF concept for storing device information. All device related information is stored into one single hierarchical XML file, including CPCA and SNMP information, PPD settings, Raster Data, and General Capabilities.'},
+  {term:'DNS (Domain Name System)',def:'A hierarchical, distributed database that contains mappings of DNS domain names to various types of data, such as IP addresses. DNS enables the location of computers and services by user-friendly names.'},
+  {term:'DRQM (Distributed Release Queue Management)',def:'Allows the worldwide following of a print job to the identifying user. Jobs are released anywhere users identify themselves, enabling follow-me printing across geographically distributed sites.'},
+  {term:'DsPcDb',def:'Name of the uniFLOW database. uniFLOW uses a SQL based relational database managed by a relational database management system (RDBMS).'},
+  {term:'Dual Registration (Hybrid Mode)',def:'When a device is connected to both a uniFLOW server and a uniFLOW Online tenant in a hybrid environment. Users can log in and use data from both environments depending on configuration.'},
+  // E
+  {term:'EAI (Embedded Applet Interface)',def:'Interface to integrate Non-Canon Device Applets in uniFLOW. Used to enable Secure Public Printing on Non-Canon-Device-Applets.'},
+  {term:'ESC/P 2 (Epson Standard Code for Printers)',def:'Epson\'s proprietary printer control language used for printing on Epson dot matrix and inkjet printers. Superseded by ESC/P 2.'},
+  // F-I
+  {term:'FQDN (Fully Qualified Domain Name)',def:'A complete domain name that includes the hostname and domain name. Used in certificate validation and DNS resolution. Critical for uniFLOW to resolve server names correctly.'},
+  {term:'GDI (Graphic Device Interface)',def:'Microsoft Windows standard for representing graphical objects and transmitting them to output devices such as monitors and printers.'},
+  {term:'GUID (Globally Unique Identifier)',def:'A unique reference number used as an identifier in software. In uniFLOW, used for identifying workflows, agents, and other entities.'},
+  {term:'Hotfolder Monitor',def:'Device Agent that monitors a folder on the hard drive for incoming print files. When found, inserted into the spooler. Note: uniFLOW server runs as Local Service — cannot access network shares without account change.'},
+  {term:'ICMP',def:'Internet Control Message Protocol. Used by Device Agents to check if a device is online before establishing contact via HTML ("Ping Check").'},
+  {term:'ICARUS Server',def:'A uniFLOW component that manages USB desktop scanners. In combination with the ICARUS Server for Web, supported USB desktop scanners can be processed in uniFLOW Scanning workflows.'},
+  {term:'IIS (Internet Information Services)',def:'Microsoft\'s web server software used to host web applications and services. uniFLOW may require IIS for certain web-based features.'},
+  {term:'IPP (Internet Printing Protocol)',def:'A protocol for printing over the internet or other IP networks. Built on HTTP, supports job status queries, printer capabilities, authentication, and encryption (IPPS on port 443).'},
+  {term:'IPPS',def:'IPP over TLS/SSL — the encrypted version of Internet Printing Protocol. Provides secure printing over HTTPS on port 443.'},
+  // L
+  {term:'LDAP (Lightweight Directory Access Protocol)',def:'An application protocol for querying and modifying information services running over an IP network. The current version is specified in RFC 4510 / RFC 4511.'},
+  {term:'LFP (Large Format Printer / Printing)',def:'Large format print devices preferably are ink jet printers with a printing width ranging from 1.3m to 5m. Capable of printing on numerous media like textiles, adhesive foils, and cardboard.'},
+  {term:'LM / ULM (Universal Login Manager)',def:'A uniFLOW MEAP Applet that allows restricting access to functions of MEAP-enabled MFPs to authenticated users only.'},
+  {term:'LPD (Line Printer Daemon)',def:'Receives commands via a TCP connection to control a locally connected printer. Protocol described in RFC 1179. Within Windows, the implementation is called TCP/IP Print Server.'},
+  {term:'LPR (Line Printer Remote)',def:'A TCP/IP based protocol used to submit print jobs to a remote printer within a network. Jobs are processed by the Line Printer Daemon (LPD) on port 515. Also called Berkeley Printing System.'},
+  // M
+  {term:'MAPI (Messaging Application Programming Interface)',def:'Provides email messaging functionality to client programs. Used by uniFLOW for email integration.'},
+  {term:'mDNS (Multicast DNS)',def:'A main component of Zeroconf. Provides DNS features without using a central DNS server. Used for device discovery on local networks without a DNS server.'},
+  {term:'MEAP (Multifunctional Embedded Application Platform)',def:'Canon\'s Java-based platform that runs applications on the MFD. Handles authentication (card readers, PIN, AD login), communication (uniFLOW login manager), and output (secure print release, scan workflows). Apps managed via SMS.'},
+  {term:'MFD / MFP (Multifunctional Device / Printer)',def:'A device that provides multiple functions: printing, scanning, copying, and faxing. Also called Multifunctional Peripheral (MFP).'},
+  {term:'MIB (Management Information Base)',def:'A database used for storing and managing information about a network or device. SNMP-compliant devices store data about themselves in MIBs and return this to SNMP requesters.'},
+  {term:'MIND (Modular Identification Network Device)',def:'Canon\'s department ID management system for controlling access to device functions. Managed via CPCA.'},
+  {term:'MMC (Microsoft Management Console)',def:'A component of Windows that provides system administration via a modular interface using snap-ins. Used for managing services, users, and system configuration.'},
+  // N-P
+  {term:'NAT (Network Address Translation)',def:'Technique for translating IP addresses between private and public networks. uniFLOW Online designed to work through NAT — MFD connects OUT to cloud, no inbound ports needed.'},
+  {term:'N-UP Printing',def:'Printing multiple pages of a document on a single sheet of paper. For example, 2-up prints 2 pages per side.'},
+  {term:'ODBC (Open Database Connectivity)',def:'A standard API for accessing database management systems. uniFLOW can use ODBC for database connectivity.'},
+  {term:'OID (Object Identifier)',def:'A unique identifier used in SNMP MIBs to identify managed objects. Each device parameter has a specific OID.'},
+  {term:'PCL (Printer Command Language)',def:'A page description language (PDL) developed by Hewlett-Packard for printer control. Widely supported across printer brands. Canon Generic PCL 6 Driver is based on PCL XL.'},
+  {term:'PDL (Page Description Language)',def:'A language that describes the appearance of a printed page. Examples include PCL, PostScript, PDF, and UFR II.'},
+  {term:'PJL (Printer Job Language)',def:'A language used to control printer settings at the job level, outside of the PDL. Used for setting tray selection, duplex, stapling, and other finishing options.'},
+  {term:'POS (Print Optimizing System)',def:'A Canon system for optimizing print quality and consistency across devices.'},
+  {term:'PPD (PostScript Printer Description)',def:'Files created by vendors to describe the entire set of features and capabilities for their PostScript printers.'},
+  {term:'PPML (Personalized Print Markup Language)',def:'An XML-based data format offering advantages in print processing: smaller file sizes, resource management, reusable content, and easy integration with web services.'},
+  {term:'Proxy',def:'A server that sits between clients and the internet. uniFLOW Release Station needs HTTPS internet access to communicate with uniFLOW Online. If an authenticating proxy is in use, MFDs cannot provide credentials — proxy bypass is needed.'},
+  {term:'PS (PostScript)',def:'A page description and programming language used primarily in electronic and desktop publishing. PS files are used for lossless output of graphics on a variety of output devices.'},
+  // R
+  {term:'RBR (Rule Based Routing)',def:'Routes print jobs to different printers based on certain rules. Users can be notified via email, web pop-up or Windows Messenger Service.'},
+  {term:'RDO (Raster Document Object)',def:'A metafile format used by Xerox DocuTech hardware and software. Important file format in the print-on-demand market sector.'},
+  {term:'RIA (Rich Internet Application)',def:'An application that delivers rich content via the internet. Runs client-side within the user\'s browser, communicating with an application server. Does not require software installation.'},
+  {term:'RPS (Remote Print Server)',def:'An add-on license to a uniFLOW server. Collects printer accounting information on a specific print server and uploads it to the central uniFLOW server.'},
+  {term:'RUI (Remote User Interface)',def:'A tool for remote administration of Canon MFPs via a web browser. Used to configure device settings, install MEAP apps, and manage device configuration. SMS always uses TLS encryption.'},
+  // S
+  {term:'Server Cluster',def:'A group of computers (nodes) that work together as a single system to ensure mission-critical applications and resources remain available to clients. Presents the appearance of a single server.'},
+  {term:'SFP (Single Functional Printer)',def:'Unlike MFP devices, an SFP has one single function only — printing. Can be used as a networked device depending on make and model.'},
+  {term:'SMB (Server Message Block)',def:'Application-level network protocol for shared access to files, printers, serial ports, and communications between nodes on a network. Provides authenticated inter-process communication. Port: 445 (TCP).'},
+  {term:'SMS (Service Management Service)',def:'A service that allows MEAP applications to be managed on a MEAP device using a remote Web Browser. Used to install/uninstall and start/stop MEAP applications.'},
+  {term:'SMTP (Simple Mail Transfer Protocol)',def:'The de facto standard for email transmissions across the Internet. Used by uniFLOW for email notifications and scan-to-email. Port 587 (TLS) or 465 (SSL).'},
+  {term:'SNMP (Simple Network Management Protocol)',def:'Used in network management to monitor network-attached devices. Consists of standards including an application layer protocol, a database scheme, and data objects. Works by sending PDUs to different parts of a network. SNMP-compliant agents store data in MIBs.'},
+  {term:'SPP (uniFLOW Secure/Public Printing Applet)',def:'One of the two applets that come with the MEAP DEVICE ID LICENSE. Designed for Secure Printing on Canon MFDs.'},
+  {term:'SSO (Single Sign-On)',def:'One-time logon method enabling a user to log on and gain access to all devices and services of a domain with a single authentication. The iR\'s display is locked until the user has entered valid credentials.'},
+  // T
+  {term:'TAC (Total Area Click)',def:'A value developed by Océ to allow click pricing for ColorWave devices. Calculated based on print volume (square meter), toner coverage (g/m²), and service costs.'},
+  {term:'TCP/IP (Transmission Control Protocol/Internet Protocol)',def:'TCP guarantees all bytes received will be identical and in the same order as sent. IP delivers network packets from source host to destination host. Together they form the core of the Internet Protocol Suite.'},
+  {term:'TIC (Temporary Identification Code)',def:'A temporary number for getting card numbers into the system without manual intervention. Self-learning system provided with the uniFLOW Login Manager.'},
+  {term:'TLS (Transport Layer Security) / SSL (Secure Sockets Layer)',def:'Cryptographic protocols that provide secure communications over the Internet. TLS is mostly used with HTTPS. Known implementations: OpenSSL and GnuTLS. uniFLOW Online requires TLS 1.2 minimum.'},
+  {term:'TWAIN Driver',def:'A widely-used program that allows scanning an image directly into an application. In combination with ICARUS Server for Web, USB desktop scanners can be processed in uniFLOW Scanning workflows.'},
+  // U
+  {term:'UDP (User Datagram Protocol)',def:'One of the core protocols of the Internet Protocol suite. Used for simple transmission where error checking/correction during transport is not necessary. Used together with IP without TCP. Used by SNMP, CPCA, and DNS.'},
+  {term:'UFR / UFR II (Ultra Fast Rendering)',def:'Page Description Languages (PDLs) created for Canon printers. UFR II incorporates load-balancing for efficient distribution of data processing loads between the PC and the printer.'},
+  {term:'ULM',def:'Universal Login Manager. See also LM (Universal Login Manager).'},
+  {term:'VLAN (Virtual Local Area Network)',def:'Splits one physical network into multiple logical networks. Devices on different VLANs cannot communicate unless a router/firewall explicitly allows it. Common cause of uniFLOW deployment issues.'},
+  // W
+  {term:'WAMP',def:'Acronym: Windows, Apache, MySQL, PHP/Perl/Python. Software stack for setting up a fully functional web server. Used in uniFLOW deployment context.'},
+  {term:'Web Submission (WS - discontinued)',def:'A web-based interface for submitting print jobs to the uniFLOW main server. Users can upload documents and retrieve prints at a remote location. Discontinued, supported on project basis only.'},
+  {term:'PostScript (PS)',def:'A page description and programming language developed by Adobe. Used primarily in electronic and desktop publishing. PS files contain vector and raster data for lossless output. Essential for prepress, high-end graphics, and some accounting/ERP systems. Processed by a RIP (Raster Image Processor) on the printer. Note: PostScript printers are generally more expensive than PCL-only models.'},
+  {term:'PCL (Printer Command Language)',def:'Hewlett-Packard\'s page description language. PCL 5e supports HP-GL/2 vector graphics. PCL 6 (PCL XL) provides faster printing for business applications. Widely supported across printer brands. Canon Generic PCL 6 Driver is based on PCL XL.'},
+  {term:'PCL XL',def:'Also called PCL 6. An object-oriented page description language providing faster performance for business graphics. NOT backward-compatible with PCL 5. Uses binary encoding. Supported by Canon Generic PCL 6 Driver.'},
+  {term:'UFR II (Ultra Fast Rendering)',def:'Canon\'s proprietary page description language. Splits rendering processing between PC and printer for load-balanced performance. The default/recommended driver for Canon imageRUNNER devices. Part of CAPT (Canon Advanced Printing Technology).'},
+  {term:'V3 Driver',def:'The traditional Windows printer driver model. Runs in kernel mode — a buggy driver can BSOD the OS. Supports Type 3 and Type 4 drivers. More feature-rich but less safe. Widely deployed on enterprise print servers.'},
+  {term:'V4 Driver',def:'The modern Windows printer driver model. Runs in user mode — crash-safe. Uses JavaScript-based configuration and manifest-based setup. Required for Windows 8/10/11 modern UI. Best practice: V4 on clients, V3/V4 mixed on servers depending on needs.'},
+  {term:'Print Queue',def:'A logical destination in the Windows Print Spooler. Each queue has a driver (translates data) and a port (sends data to device). Multiple queues can point to the same physical printer with different drivers.'},
+  {term:'Print Spooler (Spoolsv.exe)',def:'The Windows service managing the printing process. Receives print jobs, stores them on disk, and sends them to the printer. Can be a bottleneck — especially with large EMF-based print jobs. Emergency fix: net stop spooler, clear PRINTERS folder, net start spooler.'},
+  {term:'Print Processor',def:'A DLL telling the spooler how to process print job data types: RAW (client-side rendering, smaller spool file) vs EMF (server-side rendering, larger spool file, reprintable from server). A key deployment decision.'},
+  {term:'Rule-Based Routing (RBR)',def:'Routes print jobs to different printers based on configurable rules — page count, color vs B&W, cost center, time of day. Users can be notified via email, web pop-up, or Windows Messenger Service. Requires RBR license in uniFLOW.'},
+  {term:'Kerberos',def:'A network authentication protocol using tickets. Default authentication method for Windows AD. Requires time synchronization between the MFD and domain controller. If clock skew exceeds 5 minutes, auth fails.'},
+  {term:'NTLM',def:'Legacy Windows challenge-response authentication protocol. Used as fallback when Kerberos is unavailable. Weaker than Kerberos — vulnerable to relay attacks. Some older MFPs rely on NTLM.'},
+  {term:'AirPrint',def:'Apple mobile printing protocol built on IPP (Internet Printing Protocol). Uses mDNS/Bonjour (port 5353 UDP) for printer discovery. No driver needed on iOS/macOS. Discovery is link-local only — does not cross VLANs without a relay.'},
+  {term:'Mopria',def:'Cross-vendor mobile printing standard for Android. Supported by Canon, HP, Epson, Xerox. Uses IPP and mDNS discovery.'},
+  {term:'Microsoft Universal Print',def:'Cloud-based print infrastructure from Microsoft. Replaces on-prem print servers with cloud-connected printers. No driver management or GPO needed. Canon MFPs support it natively or via connector.'},
+  {term:'NTP (Network Time Protocol)',def:'Used to synchronize clock time between computers. Critical for Kerberos authentication. If MFD clock differs from DC by more than 5 minutes, auth fails. Set NTP on every MFD during deployment.'},
+  {term:'Security Hardening',def:'The practice of securing MFDs by changing default passwords, disabling unnecessary ports (Telnet 23, FTP 21), restricting port 9100 to print servers, changing SNMP community strings, keeping firmware updated, and enforcing TLS 1.2 minimum. Printers are a common overlooked attack vector.'},
+];
+
+// ══════════════════════════════════════════
+// ACHIEVEMENTS
+// ══════════════════════════════════════════
+const achievements = [
+  {id:'a1',icon:'🎓',name:'First Steps',desc:'Complete your first module'},
+  {id:'a2',icon:'🧠',name:'Scholar',desc:'Complete all 18 modules'},
+  {id:'a3',icon:'🎯',name:'Perfect Score',desc:'Pass every quiz on first try'},
+  {id:'a4',icon:'🔌',name:'Port Master',desc:'Match all ports in the port game'},
+  {id:'a5',icon:'🔍',name:'Network Detective',desc:'Read the hint for all 10 scenarios'},
+  {id:'a6',icon:'🏅',name:'Glossary Guru',desc:'Expand all glossary terms'},
+  {id:'a7',icon:'📝',name:'Language Specialist',desc:'Complete the Printer Languages module'},
+  {id:'a8',icon:'🖥️',name:'Deployment Pro',desc:'Complete all advanced modules (Drivers + Print Management)'},
+  {id:'a9',icon:'🕵️',name:'Methodical',desc:'Complete Troubleshooting Methodology module'},
+  {id:'a10',icon:'🔐',name:'Access Granted',desc:'Complete Authentication module'},
+  {id:'a11',icon:'🛡️',name:'Fort Knox',desc:'Complete Security Hardening module'},
+];
+
+// ══════════════════════════════════════════
+// INITIALIZATION
+// ══════════════════════════════════════════
+function init(){
+  renderModules();
+  renderScenarios();
+  renderGlossary();
+  renderAchievements();
+  setupPortGame();
+  setupTabs();
+  updateUI();
+  // Load saved state
+  try{
+    const saved = JSON.parse(localStorage.getItem('dojo_state_v2'));
+    if(saved){
+      state.xp = saved.xp || 0;
+      state.level = saved.level || 1;
+      if(saved.completedModules) saved.completedModules.forEach(m => state.completedModules.add(m));
+      if(saved.achievements) saved.achievements.forEach(a => state.achievements.add(a));
+      saved.portMatches = saved.portMatches || 0;
+      updateUI();
+      renderAchievements();
+      // Mark completed modules
+      document.querySelectorAll('.module-card').forEach(card => {
+        if(state.completedModules.has(card.dataset.id)) card.classList.add('completed');
+      });
+    }
+  }catch(e){}
+}
+
+// ══════════════════════════════════════════
+// SAVE / LOAD STATE
+// ══════════════════════════════════════════
+function saveState(){
+  try{
+    localStorage.setItem('dojo_state_v2', JSON.stringify({
+      xp: state.xp,
+      level: state.level,
+      completedModules: [...state.completedModules],
+      achievements: [...state.achievements],
+      portMatches: state.portMatches,
+    }));
+  }catch(e){}
+}
+
+// ══════════════════════════════════════════
+// XP SYSTEM
+// ══════════════════════════════════════════
+function addXP(amount){
+  state.xp += amount;
+  while(state.xp >= state.level * state.xpPerLevel){
+    state.xp -= state.level * state.xpPerLevel;
+    state.level++;
+  }
+  updateUI();
+  saveState();
+}
+
+function updateUI(){
+  document.getElementById('level-display').textContent = state.level;
+  const pct = Math.min(100, (state.xp / (state.level * state.xpPerLevel)) * 100);
+  document.getElementById('xp-bar').style.width = pct + '%';
+  document.getElementById('xp-text').textContent = `${state.xp} / ${state.level * state.xpPerLevel}`;
+  document.getElementById('module-count').textContent = `${state.completedModules.size}/${modules.length}`;
+  document.getElementById('ach-count').textContent = `${state.achievements.size}/${achievements.length}`;
+}
+
+// ══════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════
+function setupTabs(){
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      // Redraw canvas if port tab
+      if(btn.dataset.tab === 'portgame') setTimeout(drawPortGame, 100);
+    });
+  });
+}
+
+// ══════════════════════════════════════════
+// MODULES RENDERER
+// ══════════════════════════════════════════
+function renderModules(){
+  const grid = document.getElementById('module-grid');
+  grid.innerHTML = modules.map((m, i) => `
+    <div class="module-card" data-id="${m.id}" data-idx="${i}" onclick="openLesson(${i})">
+      <div class="icon">${m.icon}</div>
+      <h3>${m.title}</h3>
+      <p>${m.desc}</p>
+      <span class="badge badge-${m.level}">${m.level}</span>
+      <span style="color:var(--accent);font-size:0.75rem;margin-left:8px">+${m.xp} XP</span>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════
+// LESSON CONTENT (expanded with official glossary references)
+// ══════════════════════════════════════════
+const lessonContent = {
+  m1: `<h2>🌐 IP Addressing & Subnets</h2>
+<p>An IP address is a number that identifies a device on a network. Without it, no other device can find it. Every device on a TCP/IP network — your laptop, a printer, the uniFLOW server — has at least one.</p>
+
+<h3>IPv4 vs IPv6</h3>
+<p><b>IPv4</b> (<code>192.168.3.10</code>): four numbers 0-255 each. What you'll see 99% of the time.</p>
+<p><b>IPv6</b> (<code>2001:db8::1</code>): longer, hexadecimal. Growing but still minority in enterprise printing.</p>
+
+<h3>Subnets</h3>
+<p>A <b>subnet mask</b> defines which IPs are "local" (same network) vs "remote" (different network).</p>
+<p><code>192.168.3.10</code> with <code>255.255.255.0</code> (<code>/24</code>):</p>
+<ul>
+  <li><code>192.168.3.0</code> to <code>192.168.3.255</code> = local (254 usable)</li>
+  <li>Everything else = remote, must go through the <b>gateway</b></li>
+</ul>
+
+<h3>Gateway</h3>
+<p>The router that connects your local network to other networks. Usually <code>192.168.3.1</code> or <code>192.168.1.1</code>.</p>
+
+<div class="info-box">
+<strong>🔗 uniFLOW connection:</strong> When a customer says "printers are on VLAN 10 and the server on VLAN 20," traffic must pass through a router/firewall. If the firewall isn't configured for the right ports, nothing works.
+</div>
+
+<h3>Static vs DHCP</h3>
+<ul>
+  <li><b>Servers MUST have static IPs.</b> If the uniFLOW server's IP changes, everything breaks.</li>
+  <li><b>Printers SHOULD have static IPs.</b> If a printer's IP changes, uniFLOW can't find it.</li>
+  <li><b>Workstations can use DHCP.</b> Their IP doesn't matter to anyone else.</li>
+</ul>
+
+<div class="warn-box">
+<strong>⚠️ Common pitfall:</strong> DHCP lease expires over a weekend → printer gets a new IP → Monday morning, nothing prints. Solution: DHCP reservations or static IPs.
+</div>
+
+<h3>Check your own setup</h3>
+<p><code>ip route show default</code> — shows your gateway.</p>
+<p><code>ip addr show</code> — shows your IP and subnet.</p>`,
+
+  m2: `<h2>🚪 Ports — The Doors</h2>
+<p>An IP address tells you <i>which machine</i>. A port tells you <i>which service</i> on that machine.</p>
+<p>Think of the machine as an apartment building. The IP is the street address. Ports are individual apartment doors, numbered 0-65535.</p>
+
+<h3>Port ranges</h3>
+<table class="port-table">
+<tr><th>Range</th><th>Name</th><th>Examples</th></tr>
+<tr><td>0-1023</td><td>Well-known</td><td>80 (HTTP), 443 (HTTPS), 25 (SMTP)</td></tr>
+<tr><td>1024-49151</td><td>Registered</td><td>1433 (SQL), 9100 (printing), 8080 (proxy)</td></tr>
+<tr><td>49152-65535</td><td>Ephemeral</td><td>Temporary ports for outbound connections</td></tr>
+</table>
+
+<h3>The Four-Number Connection</h3>
+<p>Every connection is defined by FOUR numbers:</p>
+<pre style="background:var(--bg3);padding:0.8rem;border-radius:6px;color:var(--accent);font-family:monospace;font-size:0.8rem">
+Source IP : Source Port  →  Destination IP : Destination Port
+192.168.3.10 : 52341     →  192.168.3.50    : 443
+</pre>
+
+<div class="info-box">
+<strong>Key insight:</strong> Your computer picks a random ephemeral port (52341) for its side. The destination port is the well-known port for the service. This is why you can open 20 browser tabs to the same website — each gets a different source port.
+</div>
+
+<h3>uniFLOW-relevant ports at a glance</h3>
+<table class="port-table">
+<tr><th>Port</th><th>Protocol</th><th>Service</th></tr>
+<tr><td>80/443</td><td class="both">TCP</td><td>HTTP/HTTPS — web UI, API, MEAP app communication</td></tr>
+<tr><td>161</td><td class="udp">UDP</td><td>SNMP — device discovery, counter reading</td></tr>
+<tr><td>445</td><td class="tcp">TCP</td><td>SMB — scan-to-folder, file sharing</td></tr>
+<tr><td>9100</td><td class="tcp">TCP</td><td>RAW printing — direct job submission</td></tr>
+<tr><td>47545</td><td class="udp">UDP</td><td>CPCA — Canon device status and counter data</td></tr>
+</table>`,
+
+  m3: `<h2>📞 TCP vs UDP</h2>
+<p>Two ways to send data across a network. This choice directly affects how uniFLOW components communicate.</p>
+
+<h3>TCP — Transmission Control Protocol</h3>
+<ul>
+  <li><b>Like a phone call</b> — dial, connect, talk, hang up</li>
+  <li>Connection-oriented: 3-way handshake (SYN → SYN-ACK → ACK)</li>
+  <li><b>Guaranteed delivery:</b> lost packets are re-sent</li>
+  <li><b>Ordered:</b> packets arrive in order sent</li>
+  <li>Used for: print jobs, web browsing, email, databases, SMTP</li>
+</ul>
+
+<h3>UDP — User Datagram Protocol</h3>
+<ul>
+  <li><b>Like a postcard</b> — write, send, hope it arrives</li>
+  <li>Connectionless: no handshake, just fire and forget</li>
+  <li><b>No delivery guarantee:</b> lost packets are gone</li>
+  <li><b>No ordering:</b> packets may arrive out of order</li>
+  <li>Used for: DNS, SNMP, CPCA status notifications, device discovery</li>
+</ul>
+
+<div class="info-box">
+<strong>Official uniFLOW glossary definition:</strong> "UDP is used for simple transmission purposes where error checking and/or correction during the transport is not necessary. Thus, UDP is used together with the IP, however on the network level without the TCP." <span style="color:var(--accent2);font-size:0.7rem">— uniFLOW 2026.1 Manual, Glossary</span>
+</div>
+
+<h3>Why this matters on-site</h3>
+<ul>
+  <li>uniFLOW print jobs use <b>TCP</b> (must guarantee the document arrives intact)</li>
+  <li>Printer discovery uses <b>UDP</b> (SNMP broadcasts)</li>
+  <li>If a firewall blocks UDP port 161, uniFLOW can't discover printers for counter reading</li>
+</ul>`,
+
+  m4: `<h2>🔒 SSL/TLS & Certificates</h2>
+<p>Encryption protocol that secures data between two parties. Nobody in the middle can read it.</p>
+
+<h3>TLS Versions</h3>
+<ul>
+  <li><b>TLS 1.0/1.1</b> — Deprecated, insecure. Do not use.</li>
+  <li><b>TLS 1.2</b> — Minimum for uniFLOW Online (256-bit AES)</li>
+  <li><b>TLS 1.3</b> — Newest, fastest. Used by imageRUNNER/imageFORCE devices</li>
+</ul>
+
+<h3>Official Glossary Definition</h3>
+<div class="info-box">
+<strong>TLS (Transport Layer Security), SSL (Secure Sockets Layer):</strong> "Cryptographic protocols that provide secure communications over the Internet. Today, TLS is mostly used with HTTPS. Known implementations of the protocol are OpenSSL and GnuTLS." <span style="color:var(--accent2);font-size:0.7rem">— uniFLOW 2026.1 Manual, Glossary</span>
+</div>
+
+<h3>How it connects to your work</h3>
+<ul>
+  <li><b>uniFLOW Online:</b> ALL connections use HTTPS (TLS 1.2 minimum). OAuth 2.0 for authentication.</li>
+  <li><b>uniFLOW On-Prem:</b> SMTP with TLS on port 587. SMS web interface ALWAYS uses TLS encryption.</li>
+  <li><b>IWEMC:</b> TLS 1.3 recommended for device communication.</li>
+  <li><b>E-Maintenance:</b> Encryption for data in transit between device and Canon cloud.</li>
+</ul>
+
+<div class="warn-box">
+<strong>⚠️ Certificate problem:</strong> If a device's certificate is expired or self-signed, connections fail with "certificate error." This is why some deployments use HTTP (port 80) internally — simpler but insecure.
+</div>`,
+
+  m5: `<h2>🖨️ RAW 9100 & LPR</h2>
+<p>Direct print protocols. The "low-level" ways to send documents to a printer.</p>
+
+<h3>RAW Port 9100 (JetDirect / AppSocket)</h3>
+<table class="port-table">
+<tr><th>Property</th><th>Value</th></tr>
+<tr><td>Port</td><td><b>9100</b> (TCP)</td></tr>
+<tr><td>Protocol</td><td class="tcp">TCP</td></tr>
+<tr><td>Purpose</td><td>Direct print job submission</td></tr>
+</table>
+<p>The simplest printing protocol. Client opens a TCP connection to port 9100 and sends raw print data (PCL, PostScript, or PDF). No metadata, no job tracking — just "here's data, print it."</p>
+
+<h3>LPR/LPD (Line Printer Daemon)</h3>
+<table class="port-table">
+<tr><th>Property</th><th>Value</th></tr>
+<tr><td>Port</td><td><b>515</b> (TCP)</td></tr>
+<tr><td>Protocol</td><td class="tcp">TCP</td></tr>
+<tr><td>Purpose</td><td>Legacy print job submission</td></tr>
+</table>
+<p>Oldest printing protocol. Still supported by virtually all network printers. uniFLOW supports LPR as an alternative to RAW 9100.</p>
+
+<div class="warn-box">
+<strong>⚠️ Security:</strong> Port 9100 has NO authentication and NO encryption. Anyone who can reach port 9100 on a printer can send print jobs. This is why pull-printing (Secure Print) was invented.
+</div>
+
+<h3>uniFLOW Deployment Context</h3>
+<ul>
+  <li>uniFLOW On-Prem Step 5: When adding the output printer as "TCP/IP," port 9100 is the default.</li>
+  <li>uniFLOW Online: Jobs are released at the MFD via HTTPS (not 9100), then printed internally.</li>
+  <li>LPR on port 515 is an alternative for legacy systems.</li>
+</ul>`,
+
+  m6: `<h2>🔌 SNMP & CPCA</h2>
+<p>Two protocols for talking to devices — one universal (SNMP), one Canon-specific (CPCA).</p>
+
+<h3>SNMP — Simple Network Management Protocol</h3>
+<table class="port-table">
+<tr><th>Property</th><th>Value</th></tr>
+<tr><td>Port</td><td class="udp">161 (UDP) queries, 162 (UDP) traps</td></tr>
+<tr><td>Protocol</td><td class="udp">UDP</td></tr>
+<tr><td>Purpose</td><td>Device discovery, status monitoring, toner levels, page counters</td></tr>
+</table>
+
+<p>The <b>community string</b> is SNMP's password. Default: <code>public</code> (read) or <code>private</code> (write). Customers often change these — you MUST get the community name from them.</p>
+
+<div class="info-box">
+<strong>Official glossary definition:</strong> "SNMP consists of a set of standards for network management, including an application layer protocol, a database scheme, and a set of data objects. SNMP works by sending PDUs to different parts of a network. SNMP-compliant devices, called agents, store data about themselves in Management Information Bases (MIBs) and return this data to SNMP requesters." <span style="color:var(--accent2);font-size:0.7rem">— uniFLOW 2026.1 Manual, Glossary</span>
+</div>
+
+<h3>CPCA — Canon Peripheral Connection Architecture</h3>
+<table class="port-table">
+<tr><th>Port</th><th>Protocol</th><th>Direction</th><th>Function</th></tr>
+<tr><td class="udp">47545</td><td>UDP</td><td>Device↔Server</td><td>Status, counters, wake-from-sleep</td></tr>
+<tr><td class="tcp">47546</td><td>TCP</td><td>Server→Device</td><td>Alarm/jam/service logs</td></tr>
+<tr><td class="tcp">9007</td><td>TCP</td><td>Server→Device</td><td>Log information retrieval</td></tr>
+<tr><td class="tcp">9013</td><td>TCP</td><td>Server→Device</td><td>MF-series device info</td></tr>
+<tr><td class="udp">11427</td><td>UDP</td><td>Device→Server</td><td>Power state notification</td></tr>
+</table>
+
+<div class="info-box">
+<strong>Official glossary definition:</strong> "CPCA (Canon Peripheral Connection Architecture) is Canon\'s proprietary protocol for communicating with their devices. It retrieves detailed counter information (service mode counters, department counters, part counters), firmware information, real-time status change notifications, alarm/service call/jam logs, and can wake devices from sleep mode." <span style="color:var(--accent2);font-size:0.7rem">— uniFLOW 2026.1 Manual, Glossary</span>
+</div>
+
+<h3>Which one to use?</h3>
+<ul>
+  <li><b>SNMP</b> — Good for basic device discovery and counter reading across all vendors</li>
+  <li><b>CPCA</b> — Richer data, Canon-specific. Used by Canon Data Collection Agent, IWEMC, E-Maintenance</li>
+  <li>If CPCA ports are blocked, you still get basic SNMP data but lose detailed counters and real-time alerts</li>
+</ul>`,
+
+  m7: `<h2>🗄️ SMB & Scan-to-Folder</h2>
+
+<h3>SMB/CIFS — Windows File Sharing</h3>
+<table class="port-table">
+<tr><th>Port</th><th>Protocol</th><th>Purpose</th></tr>
+<tr><td class="tcp">445</td><td>TCP</td><td>Direct SMB (modern)</td></tr>
+<tr><td class="tcp">139</td><td>TCP</td><td>NetBIOS session (legacy)</td></tr>
+</table>
+
+<div class="info-box">
+<strong>Official glossary definition:</strong> "SMB operates as an application-level network protocol mainly applied to shared access to files, printers, serial ports, and miscellaneous communications between nodes on a network. It also provides an authenticated Inter-process communication mechanism." <span style="color:var(--accent2);font-size:0.7rem">— uniFLOW 2026.1 Manual, Glossary</span>
+</div>
+
+<h3>Scan-to-Folder</h3>
+<p>When a user scans a document and it saves to <code>\\\\fileserver\\scans</code>, that's SMB on port 445. Port 445 must be open between the MFD and the file server.</p>
+
+<div class="warn-box">
+<strong>⚠️ #1 Scan-to-Folder Failure:</strong> SMB version mismatch. Windows Server 2022 requires SMB 3.0 with encryption. Older MFPs may only support SMB 1.0 (disabled by default on modern Windows for security). This causes scan-to-folder to fail silently — the MFD says "Complete" but the file never arrives.
+</div>
+
+<h3>Quick Troubleshooting</h3>
+<ol>
+  <li>Confirm the MFD can reach the file server (ping test)</li>
+  <li>Check SMB version support on both sides</li>
+  <li>Verify firewall allows outbound TCP 445 from MFD VLAN to file server</li>
+  <li>Test with a different share path (avoid long UNC paths)</li>
+  <li>Check the file server's event log for SMB session failures</li>
+</ol>`,
+
+  m8: `<h2>🧱 Firewalls, VLANs & Proxies</h2>
+<p>The <b>#1 deployment blocker</b> for uniFLOW. Every data path must be allowed through every firewall along the way.</p>
+
+<h3>Firewall Rules</h3>
+<p>A firewall rule says: <code>Allow traffic FROM 192.168.3.0/24 TO 192.168.10.50 ON port 443</code>. Everything not explicitly allowed is <b>denied</b>.</p>
+
+<h3>Common uniFLOW Firewall Ports</h3>
+<table class="port-table">
+<tr><th>Direction</th><th>Port</th><th>Protocol</th><th>Why</th></tr>
+<tr><td>MFD → uniFLOW Server</td><td class="both">443</td><td>TCP</td><td>Authentication, job release</td></tr>
+<tr><td>MFD → uniFLOW Server</td><td class="udp">47545</td><td>UDP</td><td>CPCA status/events</td></tr>
+<tr><td>uniFLOW Server → MFD</td><td class="udp">161</td><td>UDP</td><td>SNMP counter reading</td></tr>
+<tr><td>uniFLOW Server → MFD</td><td class="tcp">9100</td><td>TCP</td><td>RAW print job submission</td></tr>
+<tr><td>MFD → File Server</td><td class="tcp">445</td><td>TCP</td><td>Scan-to-folder (SMB)</td></tr>
+<tr><td>uniFLOW Server → SQL</td><td class="tcp">1433</td><td>TCP</td><td>Database connection</td></tr>
+<tr><td>uniFLOW Server → SMTP</td><td class="tcp">587</td><td>TCP</td><td>Email notifications</td></tr>
+</table>
+
+<h3>VLANs — Virtual Walls</h3>
+<p>Splits one physical network into multiple logical networks. Devices on different VLANs can't talk unless a router/firewall explicitly allows it.</p>
+<ul>
+  <li>VLAN 10: Printers (<code>192.168.10.0/24</code>)</li>
+  <li>VLAN 20: Servers (<code>192.168.20.0/24</code>)</li>
+</ul>
+<p>If printers are on VLAN 10 and the uniFLOW server is on VLAN 20, traffic must cross through the firewall. First question on "can't see printers": <b>Are they on the same VLAN?</b></p>
+
+<h3>Proxies</h3>
+<p>Many enterprises route ALL traffic through a proxy. But MFDs often <b>bypass the proxy</b> — or need an explicit exception.</p>
+<p><b>URLs needing proxy bypass:</b></p>
+<ul>
+  <li><code>*.nt-ware.com</code></li>
+  <li><code>*.uniflowonline.com</code></li>
+  <li><code>device.c-cdsknn.net</code> / <code>device02.c-cdsknn.net</code></li>
+  <li><code>download.nt-ware.net</code></li>
+</ul>`,
+
+  m9: `<h2>📡 DNS, DHCP & NAT</h2>
+
+<h3>DNS — The Phonebook</h3>
+<p>Translates names to IPs. <code>uniflow.customer.com</code> → DNS → <code>192.168.3.10</code></p>
+<div class="info-box">
+<strong>Official uniFLOW guideline:</strong> The uniFLOW Release Station requires Primary DNS and Secondary DNS configuration (firmware V1.5 or newer required).
+</div>
+<p><b>If DNS is broken, nothing works</b> — not even if the network is perfectly fine. This is why some admins hardcode IPs (bypasses DNS failures).</p>
+
+<h3>DHCP — Dynamic Host Configuration Protocol</h3>
+<p>Device boots up, broadcasts "I need an IP!" DHCP server responds "Use 192.168.3.50 for 24 hours."</p>
+<ul>
+  <li><b>Servers:</b> Static IP mandatory</li>
+  <li><b>Printers:</b> Static IP strongly recommended. DHCP lease expiry → IP change → uniFLOW loses the printer</li>
+  <li><b>Workstations:</b> DHCP is fine</li>
+</ul>
+
+<h3>NAT — Network Address Translation</h3>
+<p>Converts private IPs to public IPs. <code>192.168.3.10 → Router: 203.0.113.5 → Internet</code></p>
+<ul>
+  <li><b>uniFLOW Online:</b> Designed to work through NAT — MFD connects OUT, no inbound ports needed</li>
+  <li><b>uniFLOW On-Prem:</b> Everything is local — NAT doesn't apply</li>
+  <li><b>Remote access:</b> Need port forwarding (inbound NAT rule for 443)</li>
+</ul>`,
+
+  m10: `<h2>⚙️ Device Agents & Deployment</h2>
+<p>Sourced directly from the <b>uniFLOW 2026.1 User Manual</b>. These are the official Device Agent types and their network requirements.</p>
+
+<h3>Device Agent Categories (Official)</h3>
+<table class="port-table">
+<tr><th>Category</th><th>Agent Type</th><th>Network Ports</th></tr>
+<tr><td>Spooler Control</td><td>CPCA Spooler Control</td><td class="udp">UDP 47545</td></tr>
+<tr><td>Counter Reading</td><td>Canon RUI Counter Reader</td><td class="both">HTTPS (port 443)</td></tr>
+<tr><td>Counter Reading</td><td>HP LaserJet Counter Reader</td><td class="both">HTTP/HTTPS</td></tr>
+<tr><td>Counter Reading</td><td>SNMP Counter Reader</td><td class="udp">UDP 161</td></tr>
+<tr><td>Counter Reading</td><td>SiteAudit Counter Reader</td><td class="udp">UDP 161</td></tr>
+<tr><td>Log Reading</td><td>CPCA Log Reader</td><td class="udp">UDP 47545</td></tr>
+<tr><td>Log Reading</td><td>Canon RUI Copy Log Reader</td><td class="both">HTTPS (port 443)</td></tr>
+<tr><td>Synchronization</td><td>CPCA Dept ID Synchronizer</td><td class="udp">UDP 47545</td></tr>
+<tr><td>Other</td><td>Hotfolder Monitor</td><td>Local file system</td></tr>
+</table>
+
+<h3>CPCA Spooler Control</h3>
+<div class="info-box">
+<strong>From the official manual:</strong> "This Device Agent is used to exercise control over the built-in spooler of a Canon MFP via CPCA. Its functionality includes stopping, pausing, and aborting print jobs that are already spooled to the Canon MFP. CPCA requires UDP port 47545. Since the built-in spooler of a Canon MFP is a network feature, it is not possible to control local print jobs (e.g., from a USB stick) via this Device Agent."
+</div>
+
+<h3>Ping Check — All Device Agents</h3>
+<p>Every Device Agent that contacts a device over HTTP/HTTPS has a <b>Ping Check</b> option:</p>
+<ul>
+  <li><b>Yes (default):</b> "Before establishing contact via HTML, the Device Agent will check whether the device is online with an ICMP ping."</li>
+  <li><b>No:</b> Bypasses ping check.</li>
+</ul>
+
+<h3>Hotfolder Monitor</h3>
+<div class="warn-box">
+<strong>Important constraint:</strong> "The uniFLOW server executes in the Local Service account. Thus, it cannot access any network shares for monitoring. If you do require to monitor network shares, please change the account that the uniFLOW Server service is configured to run in."
+</div>
+
+<h3>Key Port Summary — All-in-One</h3>
+<table class="port-table">
+<tr><th>Port</th><th>Transport</th><th>Used By</th></tr>
+<tr><td>80</td><td class="tcp">TCP</td><td>HTTP (some internal RUI access)</td></tr>
+<tr><td>443</td><td class="tcp">TCP</td><td>HTTPS (web UI, MEAP apps, Smart Client, uniFLOW Online)</td></tr>
+<tr><td>161</td><td class="udp">UDP</td><td>SNMP (device discovery, counter reading)</td></tr>
+<tr><td>445</td><td class="tcp">TCP</td><td>SMB (scan-to-folder)</td></tr>
+<tr><td>515</td><td class="tcp">TCP</td><td>LPR (legacy printing)</td></tr>
+<tr><td>587</td><td class="tcp">TCP</td><td>SMTP with TLS (email)</td></tr>
+<tr><td>631</td><td class="tcp">TCP</td><td>IPP (Internet Printing Protocol)</td></tr>
+<tr><td>1433</td><td class="tcp">TCP</td><td>SQL Server database</td></tr>
+<tr><td>9100</td><td class="tcp">TCP</td><td>RAW printing</td></tr>
+<tr><td>47545</td><td class="udp">UDP</td><td>CPCA events, counter retrieval, wake</td></tr>
+<tr><td>47546</td><td class="tcp">TCP</td><td>CPCA alarm/jam/service logs</td></tr>
+</table>`,
+
+  m11: `<h2>📝 Printer Languages — PostScript, PCL & UFR II</h2>
+<p><b>A printer language</b> (also called a Page Description Language or PDL) is the dialect your print job speaks. The driver translates your document into this language. The printer interprets it.</p>
+<p>Pick the wrong one → garbled output, missing elements, or blank pages.</p>
+
+<h3>PostScript (PS) — The Heavy Lifter</h3>
+<ul>
+  <li><b>Developed by Adobe</b> — a full programming language, not just a printer format</li>
+  <li><b>Vector-based</b> — math describes shapes, so it scales perfectly</li>
+  <li><b>Best for:</b> Prepress, high-end graphics, publishing, ERP/accounting apps that generate PostScript natively</li>
+  <li><b>Downside:</b> Processing happens ON the printer (needs a RIP = Raster Image Processor). PostScript printers cost more.</li>
+  <li><b>Port:</b> Sent via RAW 9100 or LPR 515 like any other PDL</li>
+</ul>
+
+<h3>PCL (Printer Command Language) — The Business Standard</h3>
+<ul>
+  <li><b>Developed by HP</b> — the industry standard for office printing</li>
+  <li><b>PCL 5e:</b> Supports HP-GL/2 vector graphics. Good for general office docs.</li>
+  <li><b>PCL 6 / PCL XL:</b> Object-oriented, faster for business graphics. <b>NOT backward compatible</b> with PCL 5.</li>
+  <li><b>Canon Generic PCL 6 Driver</b> — Canon\'s implementation of PCL XL. Works across Canon model families.</li>
+  <li><b>Best for:</b> Microsoft Office documents, general office printing, multi-vendor fleets</li>
+</ul>
+
+<h3>UFR II (Ultra Fast Rendering) — Canon\'s Secret Weapon</h3>
+<ul>
+  <li><b>Canon proprietary</b> — built into every Canon imageRUNNER and imageRUNNER ADVANCE</li>
+  <li><b>Load balancing:</b> The PC does some rendering, the printer finishes it. Splits the work intelligently.</li>
+  <li><b>Part of CAPT</b> (Canon Advanced Printing Technology) — optimizes throughput</li>
+  <li><b>Best for:</b> Canon-only fleets, any Canon MFP — it\'s the default and recommended driver</li>
+  <li><b>Downside:</b> Only works on Canon devices. If a customer adds non-Canon printers... you need PCL or PS.</li>
+</ul>
+
+<h3>Picking the Right One On-Site</h3>
+<table class="port-table">
+<tr><th>Situation</th><th>Use</th></tr>
+<tr><td>All Canon devices, standard office use</td><td class="tcp"><b>UFR II</b> (default Canon driver)</td></tr>
+<tr><td>Mixed vendor fleet (Canon + HP + others)</td><td class="both"><b>PCL 6</b> (universal compatibility)</td></tr>
+<tr><td>Accounting/ERP app generating PostScript</td><td class="both"><b>PostScript</b></td></tr>
+<tr><td>Publishing, prepress, high-end graphics</td><td class="both"><b>PostScript</b> (RIP on printer)</td></tr>
+<tr><td>Legacy app that crashes on UFR II</td><td class="both"><b>PCL 6</b> (try first) or <b>PostScript</b></td></tr>
+<tr><td>macOS / Linux client printing to Canon</td><td class="tcp"><b>PCL 6</b> or <b>PostScript</b> (UFR II driver not available for non-Windows)</td></tr>
+</table>
+
+<div class="warn-box">
+<strong>⚡ Pro tip:</strong> You can have <b>multiple print queues</b> pointing to the same physical printer, each with a different driver. One queue with UFR II for general use, another with PostScript for the accounting department.
+</div>`,
+
+  m12: `<h2>🖥️ Printer Drivers — V3 vs V4 & Canon Drivers</h2>
+<p>The driver is the translator between your document and the printer. In an enterprise deployment, driver selection is a <b>critical decision</b> that affects stability, performance, and support burden.</p>
+
+<h3>V3 vs V4 Windows Driver Model</h3>
+<table class="port-table">
+<tr><th>Feature</th><th>V3 (Legacy)</th><th>V4 (Modern)</th></tr>
+<tr><td>Architecture</td><td>Kernel mode — can BSOD the OS</td><td>User mode — crash-safe</td></tr>
+<tr><td>Config UI</td><td>Vendor-provided UI (separate DLL)</td><td>JavaScript-based, Windows-native UI</td></tr>
+<tr><td>Driver Store</td><td>Manual install per driver</td><td>Package-based, easier deployment</td></tr>
+<tr><td>Feature parity</td><td>Full — all finishing options</td><td>Some advanced features may be missing</td></tr>
+<tr><td>Best for</td><td>Print servers, complex finishing</td><td>Client machines, modern Windows</td></tr>
+</table>
+
+<h3>Canon Driver Types</h3>
+<ul>
+  <li><b>Canon Generic Printer Driver (UFR II / PCL 6 / PS):</b> One driver, multiple model families. Best for fleet standardization.</li>
+  <li><b>Device-specific drivers:</b> Optimized for a single model. May expose unique finishing features (punch, booklet, inserter).</li>
+  <li><b>Canon Driver Configuration Tool:</b> Pre-configure driver defaults (duplex, stapling, paper trays) before deployment.</li>
+</ul>
+
+<h3>Enterprise Deployment Methods</h3>
+<ol>
+  <li><b>Group Policy (GPO):</b> <code>Computer Configuration → Administrative Templates → Printers</code>. Push printers + drivers via AD.</li>
+  <li><b>Print Management Console:</b> <code>printmanagement.msc</code> — deploy per-user or per-machine.</li>
+  <li><b>PowerShell:</b> <code>Add-PrinterDriver</code>, <code>Add-Printer</code>, <code>Set-Printer</code> — scriptable deployment.</li>
+  <li><b>Canon Print Management:</b> uniFLOW itself can manage drivers for devices under its control.</li>
+</ol>
+
+<div class="warn-box">
+<strong>⚠️ Common mistake:</strong> Installing a 64-bit driver on a 64-bit print server but forgetting the 32-bit driver → 32-bit clients can\'t print. Always add <b>both architectures</b> (x64 + x86) on print servers in mixed-OS environments.
+</div>`,
+
+  m13: `<h2>🗂️ Print Management — Queues, Spooler & Job Routing</h2>
+<p>The path from Ctrl+P to paper involves several moving parts. Understanding them is the difference between a 2-minute fix and a 2-hour call.</p>
+
+<h3>The Print Path (Simplified)</h3>
+<pre style="background:var(--bg3);padding:0.8rem;border-radius:6px;color:var(--accent);font-family:monospace;font-size:0.75rem;overflow-x:auto;white-space:pre-wrap">
+User hits Print
+  → App sends data to Windows GDI / Print Pipeline
+    → Print Processor translates data (RAW, EMF, XPS)
+      → Print Spooler stores job on disk (Spoolsv.exe)
+        → Print Router sends to correct port (9100, 445, IPP, LPR)
+          → Printer receives and renders the page
+</pre>
+
+<h3>Print Queue</h3>
+<p>A <b>print queue</b> is a logical destination. Each queue has:</p>
+<ul>
+  <li><b>A driver</b> — translates data into the printer\'s language (UFR II, PCL, PostScript)</li>
+  <li><b>A port</b> — the connection method (IP address + port 9100, or IPP URL, or file path)</li>
+  <li><b>A name</b> — what users see when they browse for printers</li>
+</ul>
+<p>You can have <b>multiple queues</b> for the same physical printer with different drivers. This is a legitimate deployment pattern.</p>
+
+<h3>Print Spooler (Spoolsv.exe)</h3>
+<ul>
+  <li>The Windows service that <b>receives, stores, and sends</b> print jobs</li>
+  <li>Jobs are stored as <b>spool files</b> in <code>C:\Windows\System32\spool\PRINTERS</code></li>
+  <li>Two modes:
+    <ul>
+      <li><b>RAW:</b> Client renders the page → sends finished data → server just forwards it (small spool files)</li>
+      <li><b>EMF:</b> Server renders the page → can reprint from server → large spool files (can choke the server)</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="warn-box">
+<strong>⚠️ Spooler death spiral:</strong> Large EMF jobs + user retries = Spoolsv.exe memory explosion. Fix: Switch large-document users to RAW mode. Emergency: <code>net stop spooler</code> → delete <code>PRINTERS</code> folder contents → <code>net start spooler</code>.
+</div>
+
+<h3>Job Routing in uniFLOW</h3>
+<ul>
+  <li><b>RBR (Rule-Based Routing):</b> Routes jobs by rules — color vs B&W, page count, cost center, time of day. Notification options: email, web pop-up, Windows Messenger.</li>
+  <li><b>CRQM (Collective Release Queue Management):</b> Combines print servers into a collective. Users collect jobs from any device on any server in the collective.</li>
+  <li><b>DRQM (Distributed Release Queue Management):</b> Worldwide follow-me printing. Authenticate at any device anywhere, release your jobs. Geographically distributed.</li>
+  <li><b>RPS (Remote Print Server):</b> Add-on license. Collects accounting data on a remote print server and uploads to the central uniFLOW server. For branch offices with their own print server.</li>
+</ul>`,
+
+  m14: `<h2>🕵️ Troubleshooting Methodology</h2>
+<p>Most printer problems are solved not by luck but by following a repeatable process. This methodology works whether you are diagnosing a network issue, a driver problem, or a dead printer.</p>
+
+<h3>The 5-Step Methodology</h3>
+
+<h4>Step 1: Gather Information</h4>
+<ul>
+  <li>What exactly is broken? (printer not printing vs wrong output vs slow)</li>
+  <li>When did it start? (after a power outage? after an update? this morning?)</li>
+  <li>Who is affected? (one user? one printer? everyone?)</li>
+  <li>What changed? (new printer? new server? new driver? firmware update?)</li>
+  <li><b>TRAP:</b> Never skip this step. Half of all diagnoses are wrong because the tech guessed instead of asking.</li>
+</ul>
+
+<h4>Step 2: Isolate the Issue</h4>
+<ul>
+  <li>Divide the system: Client &rarr; Network &rarr; Server &rarr; Printer</li>
+  <li><b>Ping the printer from the server.</b> Works = network layer is up. Fails = network or printer is down.</li>
+  <li><b>Ping the server from the printer</b> (via panel/web interface). Works = problem is downstream.</li>
+  <li><b>Print a config page from the printer panel.</b> Works = printer itself functions. Fails = printer hardware issue.</li>
+  <li>Test with a different client, different cable, different port.</li>
+</ul>
+
+<h4>Step 3: Analyze Logs & Events</h4>
+<ul>
+  <li><b>Event Viewer</b> on the print server: Application and System logs. Look for warnings at failure time.</li>
+  <li><b>Canon RUI</b> (Remote User Interface) - device web page: error history, job log, network diagnostics.</li>
+  <li><b>IWEMC</b> logs: device status, communication failures, counter timeouts.</li>
+  <li><b>uniFLOW logs:</b> Server logs. Look for timeouts, auth failures, device agent errors.</li>
+  <li><b>Procmon:</b> For install failures. Filter by process name, look for ACCESS DENIED.</li>
+</ul>
+
+<h4>Step 4: Apply Fix (One Change at a Time)</h4>
+<ul>
+  <li>Change ONE variable. Test. If it works, you found the cause.</li>
+  <li>Change TWO things at once and you have no idea which one fixed it.</li>
+  <li>Common fixes by category:
+    <ul>
+      <li>Network: Open firewall port, change DNS, assign static IP</li>
+      <li>Driver: Switch driver type (UFR II vs PCL 6 vs PS), reinstall</li>
+      <li>Server: Restart spooler, clear queue, reboot</li>
+      <li>Printer: Power cycle, reset NIC, check cable</li>
+    </ul>
+  </li>
+</ul>
+
+<h4>Step 5: Document & Verify</h4>
+<ul>
+  <li>Confirm the fix works (test from the affected user machine, not just yours)</li>
+  <li>Document: What was the symptom? What was the root cause? What fixed it?</li>
+  <li>This is how you build expertise. The tech who documents solves problems in 10 minutes that takes others 2 hours.</li>
+</ul>
+
+<div class="info-box">
+<strong>Real-world example:</strong> Printer offline in uniFLOW. Step 1: It was online this morning. Affects one device. No changes made. Step 2: Ping works from server. RUI works. Print from RUI fails. Step 3: Event Viewer shows Spooler error 7034. Step 4: Restart spooler service. Step 5: Print works. Documented: Spooler crash, likely from a corrupt print job.
+</div>`,
+
+  m15: `<h2>🔌 Physical Connectivity & Cabling</h2>
+<p>Before blaming software or network config, check the physical layer. More time is wasted on phantom network issues than on actual cabling problems.</p>
+
+<h3>Ethernet Cabling</h3>
+<ul>
+  <li><b>Cat5e:</b> 1 Gbps, 100m max. Minimum standard for any installation.</li>
+  <li><b>Cat6:</b> 10 Gbps up to 55m. Recommended for print server connections.</li>
+  <li><b>Link lights:</b> Solid green = link established. Blinking = activity. Off = no physical connection.</li>
+  <li><b>Bent pins or damaged ends</b> cause intermittent disconnects. The printer shows online but jobs fail randomly.</li>
+</ul>
+
+<h3>Power</h3>
+<ul>
+  <li><b>Check the outlet.</b> Sounds obvious, but power strips get switched off accidentally.</li>
+  <li><b>Surge protectors</b> can trip without visual indication. Test with a known-good device.</li>
+  <li><b>Power cycles fix things.</b> When all else fails: unplug printer for 30 seconds, restart.</li>
+  <li>Always check the power cable is fully seated in both the printer and the outlet.</li>
+</ul>
+
+<h3>Canon MFD Panel & Error Codes</h3>
+<ul>
+  <li>Most Canon MFPs show a code on the display or in the RUI web interface.</li>
+  <li><b>E### codes:</b> Engine/service errors. E001/E002 = fuser issues. E020/E202 = laser/drum. Need service.</li>
+  <li><b>J### codes:</b> Paper jam location. J001 = tray 1 feed. J010 = registration roller.</li>
+  <li>The RUI (Remote User Interface) at http://printer-ip/ gives the service status page without touching the device.</li>
+</ul>
+
+<h3>USB & Parallel (Legacy)</h3>
+<ul>
+  <li>USB-connected printers need a driver installed on the specific workstation. Not suitable for enterprise.</li>
+  <li>USB 2.0 max cable length: 5 meters. Longer runs need a powered hub.</li>
+  <li>You will encounter parallel ports on old dot-matrix printers in warehouses. They still work.</li>
+</ul>
+
+<div class="warn-box">
+<strong>Golden rule:</strong> When you arrive on site and find "everything was working yesterday," start with Step 1 of the Troubleshooting Methodology: GATHER INFORMATION before touching anything. Often the night cleaner unplugged the printer to plug in a vacuum.
+</div>`,
+
+  m16: `<h2>🔐 Authentication & Access Control</h2>
+<p>How does the MFD know who is standing in front of it? This is the most common source of user-facing issues.</p>
+
+<h3>Kerberos vs NTLM</h3>
+<table class="port-table">
+<tr><th>Feature</th><th>Kerberos</th><th>NTLM</th></tr>
+<tr><td>Type</td><td>Ticket-based (token)</td><td>Challenge-response</td></tr>
+<tr><td>Security</td><td>Strong - mutual authentication</td><td>Weak - vulnerable to relay attacks</td></tr>
+<tr><td>Requires</td><td>Domain controller + time sync + SPN</td><td>Just a DC</td></tr>
+<tr><td>Default in AD</td><td>Yes (since Windows 2000)</td><td>Fallback only</td></tr>
+<tr><td>MFD relevance</td><td>Canon MFPs support Kerberos for AD auth</td><td>Legacy fallback for older devices</td></tr>
+</table>
+
+<p>If time is not synchronized between the MFD and the domain controller, Kerberos fails silently. The device falls back to NTLM or fails entirely. Always check NTP settings on the printer.</p>
+
+<h3>Authentication Methods at the MFD</h3>
+<ul>
+  <li><b>PIN/Password:</b> User types their AD credentials on the touch panel. Simplest, slowest.</li>
+  <li><b>Card authentication (CAC/PIV):</b> Smart card reader at the MFD. The card certificate must be trusted.</li>
+  <li><b>Proximity card / HID:</b> Swipe a badge. The badge ID maps to the user in uniFLOW.</li>
+  <li><b>Biometric:</b> Fingerprint scanner. Less common in uniFLOW deployments.</li>
+</ul>
+
+<h3>Why Authentication Fails On-Site</h3>
+<ul>
+  <li><b>Clock skew:</b> MFD clock off by more than 5 minutes from the DC. Kerberos fails. Fix: Set NTP on the printer.</li>
+  <li><b>Wrong domain:</b> The MFD is pointed at the wrong LDAP server or domain.</li>
+  <li><b>Certificate chain broken:</b> Card auth needs the entire chain (root CA &rarr; intermediate &rarr; device cert).</li>
+  <li><b>Account locked:</b> User tried 3 wrong PINs. AD account is locked. Not a printer issue.</li>
+</ul>
+
+<div class="info-box">
+<strong>Official glossary reference:</strong> SSO is defined as: "One-time logon method enabling a user to log on and gain access to all devices and services of a domain with a single authentication. The imageRUNNER display is locked until the user has entered valid credentials."
+</div>`,
+
+  m17: `<h2>📱 Mobile Printing & Cloud</h2>
+<p>Users expect to print from phones and tablets. The landscape has shifted from PC-only printing to anywhere-anytime output.</p>
+
+<h3>AirPrint</h3>
+<ul>
+  <li>Apple built-in printing protocol on iOS and macOS.</li>
+  <li>Uses <b>IPP (Internet Printing Protocol)</b> - the same protocol used by CUPS and modern print servers.</li>
+  <li>No driver installation needed on the device - discovers printers via mDNS/Bonjour.</li>
+  <li>Canon MFPs support AirPrint. Must be enabled in device settings (RUI or panel).</li>
+  <li>If the MFD is not seen by an iPhone, check: Bonjour/mDNS enabled? Same subnet? No firewall blocking mDNS?</li>
+</ul>
+
+<h3>Mopria</h3>
+<ul>
+  <li>The Android equivalent of AirPrint - a cross-vendor standard.</li>
+  <li>Supported by Canon, HP, Epson, Xerox, and others.</li>
+  <li>Works via IPP or vendor-specific protocols.</li>
+  <li>Like AirPrint, needs mDNS discovery and the MFD on the same network segment.</li>
+</ul>
+
+<h3>Canon Print Business / Canon PRINT</h3>
+<ul>
+  <li>Canon mobile app for printing from iOS and Android.</li>
+  <li>For on-premises: App connects to the MFD on the local network.</li>
+  <li>For remote: App connects via uniFLOW Online or cloud relay.</li>
+  <li>Supports: Print, scan, copy from the phone, cloud storage integration (Box, Dropbox, OneDrive).</li>
+</ul>
+
+<h3>Microsoft Universal Print</h3>
+<ul>
+  <li>Microsoft cloud-based print infrastructure.</li>
+  <li>Replaces on-prem print servers with cloud-connected printers.</li>
+  <li>No print server, no driver management, no GPO deployment needed.</li>
+  <li>Canon MFPs support Universal Print natively via firmware update or via a connector.</li>
+  <li>Growing adoption. Know it exists, especially for M365-heavy customers.</li>
+</ul>
+
+<div class="warn-box">
+<strong>Key deployment note:</strong> Mobile printing (AirPrint/Mopria) uses mDNS discovery, which is link-local only. If the MFD is on a different VLAN than the user phone, mDNS will not cross the router. Solutions: mDNS reflector/relay, or use a static IPP URL in the print client.
+</div>`,
+
+  m18: `<h2>🛡️ Security Hardening</h2>
+<p>Printers are the most ignored security gap in enterprise IT. Every MFD on the network is a computer with an IP address, running services, and frequently running outdated code. A compromised MFD can be a pivot point into the internal network.</p>
+
+<h3>The Big Three</h3>
+
+<h4>1. Default Credentials</h4>
+<ul>
+  <li>Canon MFPs ship with default admin credentials (often admin/12345678 or similar).</li>
+  <li>If these are not changed, anyone on the network can access the RUI (web UI), change settings, install apps, or exfiltrate scanned documents.</li>
+  <li><b>Fix:</b> Change the administrator password on every MFD during deployment. Document the new password securely (password manager, not a sticky note on the printer).</li>
+</ul>
+
+<h4>2. Open Ports</h4>
+<ul>
+  <li>Every open port is an attack surface.</li>
+  <li><b>TCP 9100 (RAW):</b> No authentication, no encryption. Anyone who reaches this port can print to it. Lock it down to the print server IP only.</li>
+  <li><b>UDP 161 (SNMP):</b> Default community "public" gives read access, "private" gives write. Change these or disable if not needed.</li>
+  <li><b>Telnet (23):</b> Many MFPs have it enabled. Disable it. Use SSH or RUI (HTTPS).</li>
+  <li><b>FTP (21):</b> Often enabled for scan-to-FTP. If you are not using it, disable it. If you are, use SFTP or FTPS instead.</li>
+  <li><b>Best practice:</b> Enable only the ports needed for your deployment. Block everything else at the firewall.</li>
+</ul>
+
+<h4>3. Firmware Updates</h4>
+<ul>
+  <li>Canon regularly releases firmware updates that include security patches for CVEs.</li>
+  <li>Outdated firmware is how attackers compromise MFPs to send spam or pivot to other devices.</li>
+  <li><b>Check firmware version</b> on every device via RUI (Status Monitor > Firmware).</li>
+  <li>Subscribe to Canon security bulletins or check the Canon support portal quarterly.</li>
+  <li>Test firmware on one device before deploying fleet-wide.</li>
+</ul>
+
+<h3>Additional Best Practices</h3>
+<ul>
+  <li><b>TLS 1.2 minimum:</b> uniFLOW Online requires TLS 1.2. Disable TLS 1.0/1.1 on the MFD and server.</li>
+  <li><b>Encrypt scan-to-folder:</b> Use IPPS instead of HTTP. Use SMB 3.0 with encryption.</li>
+  <li><b>Certificate management:</b> Replace self-signed certificates with CA-signed ones. Track expiry dates.</li>
+  <li><b>Physical security:</b> Lock the MFD control panel when not in use (SSO). Place devices in view of security cameras.</li>
+</ul>
+
+<div class="warn-box">
+<strong>Real-world example:</strong> In 2020, researchers found thousands of printers exposed on the internet with default SNMP strings and open port 9100. Anyone could send print jobs. Worse, some had remote code execution vulnerabilities from outdated firmware. This is why locking down MFDs is not optional.
+  </div>`,
+
+};
+
+// ══════════════════════════════════════════
+// OPEN LESSON
+// ══════════════════════════════════════════
+function openLesson(idx){
+  const m = modules[idx];
+  const panel = document.getElementById('lesson-panel');
+  panel.classList.add('active');
+  panel.innerHTML = lessonContent[m.id] || '<h2>Lesson not found</h2>';
+
+  // Add quiz section
+  if(m.quiz && m.quiz.length){
+    panel.innerHTML += '<div class="quiz-section"><h3>📝 Module Quiz</h3></div>';
+    const qsec = panel.querySelector('.quiz-section');
+    m.quiz.forEach((q, qi) => {
+      const qid = `${m.id}_q${qi}`;
+      qsec.innerHTML += `
+        <div class="quiz-question" id="${qid}">
+          <div class="q-text">${qi+1}. ${q.q}</div>
+          <div class="quiz-options">
+            ${q.opts.map((o, oi) => `
+              <div class="quiz-option" onclick="selectQuizOption('${qid}', ${oi}, ${qi}, ${idx})">${o}</div>
+            `).join('')}
+          </div>
+          <div class="quiz-result" id="${qid}_result"></div>
+        </div>`;
+    });
+    qsec.innerHTML += `<button class="quiz-btn" onclick="checkQuiz(${idx})">✅ Check Answers</button>`;
+  }
+
+  // Scroll to panel
+  panel.scrollIntoView({behavior:'smooth'});
+}
+
+// ══════════════════════════════════════════
+// QUIZ SYSTEM
+// ══════════════════════════════════════════
+let quizSelections = {};
+
+function selectQuizOption(qid, optIdx, qi, mIdx){
+  const opts = document.querySelectorAll(`#${qid} .quiz-option`);
+  opts.forEach(o => o.classList.remove('selected'));
+  opts[optIdx].classList.add('selected');
+  quizSelections[`${qid}`] = optIdx;
+}
+
+function checkQuiz(mIdx){
+  const m = modules[mIdx];
+  let correct = 0;
+  m.quiz.forEach((q, qi) => {
+    const qid = `${m.id}_q${qi}`;
+    const selected = quizSelections[qid];
+    const opts = document.querySelectorAll(`#${qid} .quiz-option`);
+    const resultEl = document.getElementById(`${qid}_result`);
+
+    opts.forEach(o => o.classList.remove('correct','wrong'));
+
+    if(selected === undefined || selected === null){
+      resultEl.className = 'quiz-result fail';
+      resultEl.textContent = '❌ Select an answer first!';
+      return;
+    }
+
+    if(selected === q.ans){
+      opts[selected].classList.add('correct');
+      correct++;
+      resultEl.className = 'quiz-result pass';
+      resultEl.textContent = '✓ Correct!';
+      if(q.explain) resultEl.textContent += ' ' + q.explain;
+    } else {
+      opts[selected].classList.add('wrong');
+      opts[q.ans].classList.add('correct');
+      resultEl.className = 'quiz-result fail';
+      resultEl.textContent = `✗ Incorrect. The answer was: ${q.opts[q.ans]}`;
+      if(q.explain) resultEl.textContent += ' — ' + q.explain;
+    }
+  });
+
+  const total = m.quiz.length;
+  const passed = correct === total;
+
+  // Add notification
+  const btn = document.querySelector('.quiz-section .quiz-btn');
+  if(btn){
+    if(passed){
+      btn.style.background = 'linear-gradient(90deg, var(--green), var(--blue))';
+      btn.textContent = `✅ ${correct}/${total} — Module Passed! +${m.xp} XP`;
+
+      // Mark module completed if not done
+      if(!state.completedModules.has(m.id)){
+        state.completedModules.add(m.id);
+        document.querySelector('.module-card[data-id="' + m.id + '"]') && document.querySelector('.module-card[data-id="' + m.id + '"]').classList.add('completed');
+        addXP(m.xp);
+        checkAchievements();
+      }
+    } else {
+      btn.style.background = 'linear-gradient(90deg, var(--red), var(--orange))';
+      btn.textContent = `❌ ${correct}/${total} — Try again (${correct}/${total} correct)`;
+    }
+  }
+}
+
+// ══════════════════════════════════════════
+// SCENARIOS
+// ══════════════════════════════════════════
+function renderScenarios(){
+  const list = document.getElementById('scenario-list');
+  list.innerHTML = scenarios.map((s, i) => `
+    <div class="scenario-card">
+      <div class="s-title">${s.title}</div>
+      <div class="s-desc">${s.desc}</div>
+      <button class="s-toggle" onclick="toggleHint(${i})">💡 Show Hint</button>
+      <button class="s-toggle" onclick="toggleAnswer(${i})">🔓 Show Solution</button>
+      <div class="s-hint" id="hint-${i}">${s.hint}</div>
+      <div class="s-answer" id="answer-${i}">${s.answer}</div>
+    </div>
+  `).join('');
+}
+
+function toggleHint(i){
+  const el = document.getElementById('hint-'+i);
+  el.classList.toggle('show');
+}
+
+function toggleAnswer(i){
+  const el = document.getElementById('answer-'+i);
+  el.classList.toggle('show');
+  if(el.classList.contains('show')) checkAchievements();
+}
+
+// ══════════════════════════════════════════
+// GLOSSARY
+// ══════════════════════════════════════════
+function renderGlossary(){
+  const list = document.getElementById('glossary-list');
+  list.innerHTML = glossaryTerms.map(t => `
+    <div class="glossary-item" onclick="this.classList.toggle('open')">
+      <div class="term">${t.term}</div>
+      <div class="definition">${t.def}</div>
+    </div>
+  `).join('');
+}
+
+function filterGlossary(val){
+  const items = document.querySelectorAll('.glossary-item');
+  const q = val.toLowerCase();
+  items.forEach(item => {
+    const term = item.querySelector('.term').textContent.toLowerCase();
+    const def = item.querySelector('.definition').textContent.toLowerCase();
+    item.style.display = (term.includes(q) || def.includes(q)) ? 'block' : 'none';
+    if(q.length > 0) item.classList.add('open');
+  });
+  // Check achievements if user is browsing
+  if(q.length > 5) checkAchievements();
+}
+
+// ══════════════════════════════════════════
+// PORT MATCHING GAME
+// ══════════════════════════════════════════
+const portPairs = [
+  {proto:'RAW Printing',port:9100,x:0},
+  {proto:'SNMP',port:161,x:0},
+  {proto:'CPCA',port:47545,x:0},
+  {proto:'HTTPS',port:443,x:0},
+  {proto:'SMB',port:445,x:0},
+  {proto:'LPR/LPD',port:515,x:0},
+  {proto:'IPP',port:631,x:0},
+  {proto:'SMTP TLS',port:587,x:0},
+];
+
+let portLines = [];
+let portDragState = null;
+const portCanvas = document.getElementById('port-canvas');
+
+function setupPortGame(){
+  resetPortGame();
+}
+
+function resetPortGame(){
+  portLines = [];
+  portDragState = null;
+  state.portMatches = 0;
+  shuffleArray(portPairs);
+  // Assign fixed positions
+  portPairs.forEach((p, i) => {
+    p.x = 0;
+    p.matched = false;
+  });
+  drawPortGame();
+}
+
+function shuffleArray(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+}
+
+function drawPortGame(){
+  const canvas = document.getElementById('port-canvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const w = Math.min(700, rect.width - 2);
+  const h = 450;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  ctx.scale(dpr, dpr);
+
+  ctx.clearRect(0, 0, w, h);
+
+  const leftX = 30;
+  const rightX = w - 150;
+  const spacing = Math.min(50, (h - 60) / portPairs.length);
+
+  ctx.font = '13px monospace';
+
+  // Draw protocol labels (left)
+  portPairs.forEach((p, i) => {
+    const y = 30 + i * spacing + 20;
+    ctx.fillStyle = p.matched ? '#3fb950' : '#58a6ff';
+    ctx.textAlign = 'right';
+    ctx.fillText(p.proto, leftX + 130, y + 5);
+    // Left dot
+    ctx.beginPath();
+    ctx.arc(leftX + 140, y, 6, 0, Math.PI*2);
+    ctx.fillStyle = p.matched ? '#3fb950' : '#0d1117';
+    ctx.fill();
+    ctx.strokeStyle = p.matched ? '#3fb950' : '#58a6ff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  });
+
+  // Draw port numbers (right) — shuffled
+  const shuffledPorts = [...portPairs].map(p => p.port).sort((a,b) => a-b);
+  shuffledPorts.forEach((port, i) => {
+    const y = 30 + i * spacing + 20;
+    ctx.fillStyle = '#d29922';
+    ctx.textAlign = 'left';
+    ctx.fillText(port.toString(), rightX + 15, y + 5);
+    // Right dot
+    ctx.beginPath();
+    ctx.arc(rightX, y, 6, 0, Math.PI*2);
+    ctx.fillStyle = '#0d1117';
+    ctx.fill();
+    ctx.strokeStyle = '#d29922';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  });
+
+  // Draw connection lines
+  portLines.forEach(line => {
+    const protoIdx = portPairs.findIndex(p => p.proto === line.proto);
+    if(protoIdx === -1) return;
+    const y1 = 30 + protoIdx * spacing + 20;
+    const y2 = 30 + line.rightIdx * spacing + 20;
+    ctx.beginPath();
+    ctx.moveTo(leftX + 146, y1);
+    ctx.lineTo(rightX, y2);
+    ctx.strokeStyle = line.correct ? 'rgba(63,185,80,0.5)' : 'rgba(88,166,255,0.4)';
+    ctx.lineWidth = line.correct ? 3 : 2;
+    ctx.stroke();
+  });
+
+  // Update score
+  document.getElementById('port-score').textContent = `⚡ ${state.portMatches} / ${portPairs.length} matched`;
+}
+
+function checkPortMatches(){
+  portLines = [];
+  let matches = 0;
+
+  // Auto-match based on correct pairs
+  portPairs.forEach(p => {
+    const correctPortIdx = [...portPairs].map(x => x.port).sort((a,b) => a-b).indexOf(p.port);
+    if(correctPortIdx >= 0){
+      portLines.push({proto:p.proto, rightIdx:correctPortIdx, correct:true});
+      p.matched = true;
+      matches++;
+    }
+  });
+
+  state.portMatches = matches;
+  drawPortGame();
+
+  if(matches === portPairs.length){
+    setTimeout(() => {
+      alert('🎉 All ports matched! Achievement unlocked!');
+      checkAchievements();
+    }, 300);
+  }
+  updateUI();
+  saveState();
+}
+
+// ══════════════════════════════════════════
+// ACHIEVEMENTS
+// ══════════════════════════════════════════
+function renderAchievements(){
+  const grid = document.getElementById('achievement-grid');
+  grid.innerHTML = achievements.map(a => `
+    <div class="achievement-badge ${state.achievements.has(a.id) ? 'unlocked' : ''}">
+      <div class="a-icon">${a.icon}</div>
+      <div class="a-name">${a.name}</div>
+      <div class="a-desc">${a.desc}</div>
+    </div>
+  `).join('');
+}
+
+function checkAchievements(){
+  let unlocked = false;
+
+  // a1: Complete first module
+  if(state.completedModules.size >= 1 && !state.achievements.has('a1')){
+    state.achievements.add('a1'); unlocked = true;
+  }
+  // a2: Complete all modules
+  if(state.completedModules.size >= modules.length && !state.achievements.has('a2')){
+    state.achievements.add('a2'); unlocked = true;
+  }
+  // a3: Perfect quiz — check all modules completed
+  if(state.completedModules.size >= 5 && !state.achievements.has('a3')){
+    state.achievements.add('a3'); unlocked = true;
+  }
+  // a4: Port master
+  if(state.portMatches >= portPairs.length && !state.achievements.has('a4')){
+    state.achievements.add('a4'); unlocked = true;
+  }
+  // a5: Scenarios — check if any answer was revealed
+  const revealedAnswers = document.querySelectorAll('.scenario-card .s-answer.show');
+  if(revealedAnswers.length >= scenarios.length && !state.achievements.has('a5')){
+    state.achievements.add('a5'); unlocked = true;
+  }
+  // a6: Glossary — check if open
+  const glossaryOpen = document.querySelectorAll('.glossary-item.open');
+  if(glossaryOpen.length >= glossaryTerms.length && !state.achievements.has('a6')){
+    state.achievements.add('a6'); unlocked = true;
+  }
+
+  if(unlocked){
+    renderAchievements();
+    updateUI();
+    saveState();
+  }
+}
+
+// ══════════════════════════════════════════
+// START
+// ══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', init);
+window.addEventListener('resize', () => {
+  if(document.getElementById('tab-portgame').classList.contains('active')){
+    setTimeout(drawPortGame, 100);
+  }
+});
+</script>
+</body>
+</html>
